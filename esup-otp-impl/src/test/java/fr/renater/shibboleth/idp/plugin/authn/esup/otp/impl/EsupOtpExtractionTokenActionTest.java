@@ -78,7 +78,7 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         action.initialize();
         final Event event = action.execute(src);
 
-        ActionTestingSupport.assertEvent(event, AuthnEventIds.UNKNOWN_USERNAME);
+        ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
     @Test public void testMissingField() throws Exception {

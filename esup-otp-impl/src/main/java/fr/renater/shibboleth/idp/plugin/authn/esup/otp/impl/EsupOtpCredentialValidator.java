@@ -151,8 +151,8 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         if(username == null) {
             log.info("{} No username available within EsupOtpContext", getLogPrefix());
             if (errorHandler != null) {
-                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.UNKNOWN_USERNAME,
-                        AuthnEventIds.UNKNOWN_USERNAME);
+                errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
+                        AuthnEventIds.NO_CREDENTIALS);
             }
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
         }

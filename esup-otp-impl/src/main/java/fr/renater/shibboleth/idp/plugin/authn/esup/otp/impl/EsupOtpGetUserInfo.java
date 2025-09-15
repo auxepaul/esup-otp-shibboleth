@@ -163,7 +163,7 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
             final String username = usernameLookupStrategy.apply(profileRequestContext);
             if (username == null) {
                 log.warn("{} No principal name available", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.UNKNOWN_USERNAME);
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
                 return;
             }
             esupOtpContext.setUsername(username);
