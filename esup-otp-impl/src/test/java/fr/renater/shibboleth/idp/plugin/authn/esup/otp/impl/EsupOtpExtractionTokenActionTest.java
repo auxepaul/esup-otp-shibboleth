@@ -97,7 +97,7 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
 
     @Test public void testInvalidFormat() throws Exception {
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
-            mock.addParameter("tokencode", "A123456");
+            mock.addParameter("token", "A123456");
         }
 
         final Event event = action.execute(src);
@@ -107,7 +107,7 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
     @Test public void testValid() throws Exception {
         eoc.setTransportChoose(PUSH_METHOD);
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
-            mock.addParameter("tokencode", "123456");
+            mock.addParameter("token", "123456");
         }
 
         final Event event = action.execute(src);

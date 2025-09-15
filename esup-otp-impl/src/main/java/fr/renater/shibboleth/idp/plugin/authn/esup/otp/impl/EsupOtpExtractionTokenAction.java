@@ -191,7 +191,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
 
     /**
      * Gets the token code from the HTTP request.
-     * First get from form request (input "tokencode"),
+     * First get from form request (input "token"),
      * Second get from header ("X-Shibboleth-ESUPOTP")
      * 
      * @param httpRequest current HTTP request
@@ -199,7 +199,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
      * @return the token code, or null
      */
     @Nullable protected String extractCode(@Nonnull final HttpServletRequest httpRequest) {
-        String code = httpRequest.getParameter("tokencode");
+        String code = httpRequest.getParameter("token");
         if(code == null) {
             code = httpRequest.getHeader("X-Shibboleth-ESUPOTP");
         }
