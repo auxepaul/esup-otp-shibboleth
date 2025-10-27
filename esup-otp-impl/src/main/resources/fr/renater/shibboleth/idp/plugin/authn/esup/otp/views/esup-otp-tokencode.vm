@@ -19,6 +19,8 @@
 ## environment - Spring Environment object for property resolution
 ## custom - arbitrary object injected by deployer
 ##
+#set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
+##
 #set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
 #if ("push" == $esupOtpContext.getTransportChoose() || "webauthn" == $esupOtpContext.getTransportChoose())
     #set ($apiUrl = $environment.getProperty("idp.esup.otp.apiHost"))
@@ -33,7 +35,10 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 <html>
     <head>
         <title>#springMessageText("idp.title", "Web Login Service")</title>
-        #parse("head.vm")
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+        <link rel="stylesheet" type="text/css" href="$request.getContextPath()#springMessageText("idp.css", "/css/placeholder.css")">
         #if ("push" == $esupOtpContext.getTransportChoose())
             <script src="$apiUrl/js/socket.io.js"></script>
             <script type="text/javascript">
@@ -315,8 +320,37 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
     </head>
     <body>
         <main class="main">
-            <section class="small-12 small-centered medium-8 large-7">
-                #parse("header.vm")
+            <header>
+                <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/placeholder-logo.png")" alt="#springMessageText("idp.logo.alt-text", "logo")" />
+
+                #set ($serviceName = $rpUIContext.serviceName)
+                #if ($serviceName && !$rpContext.getRelyingPartyId().contains($serviceName))
+                    <h1>#springMessageText("idp.esup.otp.title", "Multi-Factor Authentication")</h1>
+                #end
+            </header>
+
+            <section>
+                #parse("csrf/csrf.vm")
+
+                #*
+                //
+                //    SP Description & Logo (optional)
+                //    These idpui lines will display added information (if available
+                //    in the metadata) about the Service Provider (SP) that requested
+                //    authentication. These idpui lines are "active" in this example
+                //    (not commented out) - this extra SP info will be displayed.
+                //    Remove or comment out these lines to stop the display of the
+                //    added SP information.
+                //
+                *#
+                #set ($logo = $rpUIContext.getLogo())
+                #if ($logo)
+                    <img class="service-logo" src= "$encoder.encodeForHTMLAttribute($logo)" alt="$encoder.encodeForHTMLAttribute($serviceName)">
+                #end
+                #set ($desc = $rpUIContext.getServiceDescription())
+                #if ($desc)
+                    <p>$encoder.encodeForHTML($desc)</p>
+                #end
 
                 #parse("esup-otp-error.vm")
 
@@ -358,9 +392,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     </article>
                 #else
                     <form action="$flowExecutionUrl" method="post">
-                        #parse("csrf/csrf.vm")
-
-                        #parse("info.vm")
 
                         #if ("bypass" == $esupOtpContext.getTransportChoose())
                             <article class="small-10 medium-10 large-7 small-centered text-center">
@@ -404,10 +435,16 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     </p>
                 </article>
 
-                #parse("help.vm")
-
+                <ul>
+                    <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>
+                    <li><a href="#springMessageText("idp.url.helpdesk", '#')">#springMessageText("idp.login.needHelp", "Need Help?")</a></li>
+                </ul>
             </section>
         </main>
-        #parse("footer.vm")
+        <footer class="footer">
+            <div class="cc">
+                <p>#springMessageText("idp.footer", "Insert your footer text here.")</p>
+            </div>
+        </footer>
      </body>
 </html>

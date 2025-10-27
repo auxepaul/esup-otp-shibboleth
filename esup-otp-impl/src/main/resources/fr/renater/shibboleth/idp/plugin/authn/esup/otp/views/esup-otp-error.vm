@@ -23,7 +23,5 @@
 #end
 
 #if ($message)
-    <article class="small-10 medium-10 large-7 small-centered">
-        <p class="callout small alert">$encoder.encodeForHTML($message)</p>
-    </article>
+    <p class="output-message output--error">$encoder.encodeForHTML($message)</p>
 #end
