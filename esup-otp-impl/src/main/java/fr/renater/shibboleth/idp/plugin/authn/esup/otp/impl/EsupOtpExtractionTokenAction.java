@@ -36,7 +36,6 @@ import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  * @event {@link AuthnEventIds#NO_CREDENTIALS}
- * @event {@link AuthnEventIds#UNKNOWN_USERNAME}
  * @event {@link AuthnEventIds#INVALID_CREDENTIALS}
  * @pre <pre>ProfileRequestContext.getSubcontext(AuthenticationContext.class) != null</pre>
  * @post <pre>AuthenticationContext.getSubcontext(EsupOtpContext.class) != null</pre>
@@ -130,7 +129,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
             final String username = usernameLookupStrategy.apply(profileRequestContext);
             if (username == null) {
                 log.warn("{} No principal name available", getLogPrefix());
-                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.UNKNOWN_USERNAME);
+                ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
                 return;
             }
             esupOtpContext.setUsername(username);

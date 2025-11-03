@@ -39,7 +39,6 @@ import net.shibboleth.shared.primitive.LoggerFactory;
  * 
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  * @event {@link AuthnEventIds#NO_CREDENTIALS}
- * @event {@link AuthnEventIds#UNKNOWN_USERNAME}
  * @event {@link AuthnEventIds#INVALID_CREDENTIALS}
  * @pre <pre>ProfileRequestContext.getSubcontext(AuthenticationContext.class) != null</pre>
  * @post <pre>AuthenticationContext.getSubcontext(EsupOtpContext.class) != null</pre>
@@ -174,7 +173,7 @@ public class EsupOtpGetUserInfo extends AbstractAuthenticationAction {
 			EsupOtpUserInfoResponse userInfo = client.getUserInfos(esupOtpContext.getUsername());
 			
 			if(!"Ok".equals(userInfo.getCode())) {
-				ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.UNKNOWN_USERNAME);
+				ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
 				return;
 			}
 

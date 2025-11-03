@@ -105,7 +105,7 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
 
         final Event event = action.execute(src);
 
-        ActionTestingSupport.assertEvent(event, AuthnEventIds.UNKNOWN_USERNAME);
+        ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
 
     }
 
