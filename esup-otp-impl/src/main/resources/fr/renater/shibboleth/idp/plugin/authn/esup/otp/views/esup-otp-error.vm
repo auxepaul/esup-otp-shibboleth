@@ -1,4 +1,4 @@
-## Velocity Template for TOTP error message production, included by esup-otp.vm
+## Velocity Template for EsupOtp error message production, included by esup-otp.vm
 ##
 ## authenticationErrorContext - context containing error data, if available
 ##
