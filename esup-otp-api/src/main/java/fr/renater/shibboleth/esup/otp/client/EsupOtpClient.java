@@ -12,14 +12,14 @@ import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
  * Esup otp api connector.
  */
 public interface EsupOtpClient {
-    
+
     //----------------------------------------------------------------
     // Otp calls.
     //----------------------------------------------------------------
-    
+
     /**
      * Retrieves detailed OTP user information for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @return EsupOtpUserInfoResponse The response object containing the OTP user information.
      * @throws EsupOtpClientException If an error occurs while retrieving the information.
@@ -28,7 +28,7 @@ public interface EsupOtpClient {
 
     /**
      * Sends a message using the specified method and transport for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param method The method used for sending the message.
      * @param transport The transport mechanism used for sending the message.
@@ -46,15 +46,15 @@ public interface EsupOtpClient {
      * @throws EsupOtpClientException If an error occurs during the secret generation process.
      */
     EsupOtpWebauthnResponse postGenerateWebauthnSecret(String uid) throws EsupOtpClientException;
-    
+
 
     //----------------------------------------------------------------
     // Protected calls.
     //----------------------------------------------------------------
-    
+
     /**
      * Retrieves detailed OTP information for a specific user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @return EsupOtpUserInfoResponse The response object containing the user's OTP information.
      * @throws EsupOtpClientException If an error occurs while retrieving the user's information.
@@ -63,7 +63,7 @@ public interface EsupOtpClient {
 
     /**
      * Performs a transport test for a specific transport method associated with a user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param transport The transport method to be tested.
      * @return EsupOtpResponse The response object containing the result of the transport test.
@@ -73,7 +73,7 @@ public interface EsupOtpClient {
 
     /**
      * Activates a specific OTP method for a user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param method The method to be activated.
      * @throws EsupOtpClientException If an error occurs during the activation process.
@@ -82,7 +82,7 @@ public interface EsupOtpClient {
 
     /**
      * Deactivates a specified method for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param method The method to be deactivated.
      * @throws EsupOtpClientException If an error occurs during the process.
@@ -91,7 +91,7 @@ public interface EsupOtpClient {
 
     /**
      * Confirms the activation of a specified method using an activation code for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param method The method to be activated.
      * @param activationCode The activation code used to confirm the activation.
@@ -102,7 +102,7 @@ public interface EsupOtpClient {
 
     /**
      * Updates the user's transport method with a new transport method.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param transport The current transport method.
      * @param newTransport The new transport method to replace the old one.
@@ -112,7 +112,7 @@ public interface EsupOtpClient {
 
     /**
      * Tests the newly updated transport method for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param transport The current transport method.
      * @param newTransport The newly updated transport method being tested.
@@ -124,7 +124,7 @@ public interface EsupOtpClient {
 
     /**
      * Sets or updates the secret for a specified method for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param method The method for which the secret is being set.
      * @return EsupOtpResponse The response object containing the result of the secret update.
@@ -134,7 +134,7 @@ public interface EsupOtpClient {
 
     /**
      * Verifies the user's identity using an OTP (one-time password).
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param otp The one-time password used for verification.
      * @return boolean Returns true if verification is successful, otherwise false.
@@ -154,23 +154,23 @@ public interface EsupOtpClient {
 
     /**
      * Deletes a specified transport method for the given user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param transport The transport method to be deleted.
      * @return EsupOtpResponse The response object containing the result of the deletion.
      * @throws EsupOtpClientException If an error occurs during the process.
      */
     EsupOtpResponse deleteTransport(String uid, String transport) throws EsupOtpClientException;
-    
-    
+
+
 
     //----------------------------------------------------------------
     // Admin calls.
     //----------------------------------------------------------------
-    
+
     /**
      * Retrieves a list of all OTP users.
-     * 
+     *
      * @return EsupOtpUsersResponse The response object containing the list of OTP users.
      * @throws EsupOtpClientException If an error occurs while retrieving the users.
      */
@@ -178,7 +178,7 @@ public interface EsupOtpClient {
 
     /**
      * Retrieves detailed information for a specific user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @return EsupOtpResponse The response object containing the user's information.
      * @throws EsupOtpClientException If an error occurs while retrieving the user's information.
@@ -187,7 +187,7 @@ public interface EsupOtpClient {
 
     /**
      * Retrieves all OTP methods associated with a specific user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @return EsupOtpResponse The response object containing the list of methods.
      * @throws EsupOtpClientException If an error occurs while retrieving the methods.
@@ -196,7 +196,7 @@ public interface EsupOtpClient {
 
     /**
      * Activates a specific transport for a method.
-     * 
+     *
      * @param method The method associated with the transport.
      * @param transport The transport to be activated.
      * @throws EsupOtpClientException If an error occurs while retrieving the methods.
@@ -205,7 +205,7 @@ public interface EsupOtpClient {
 
     /**
      * Deactivates a specific transport for a method.
-     * 
+     *
      * @param method The method associated with the transport.
      * @param transport The transport to be deactivated.
      * @throws EsupOtpClientException If an error occurs while retrieving the methods.
@@ -214,7 +214,7 @@ public interface EsupOtpClient {
 
     /**
      * Activates a specific method.
-     * 
+     *
      * @param method The method to be activated.
      * @throws EsupOtpClientException If an error occurs while retrieving the methods.
      */
@@ -222,7 +222,7 @@ public interface EsupOtpClient {
 
     /**
      * Deactivates a specific method.
-     * 
+     *
      * @param method The method to be deactivated.
      * @throws EsupOtpClientException If an error occurs while retrieving the methods.
      */
@@ -230,7 +230,7 @@ public interface EsupOtpClient {
 
     /**
      * Deletes the secret associated with a specific method for a user.
-     * 
+     *
      * @param uid The unique identifier of the user.
      * @param method The method for which the secret is being deleted.
      * @return EsupOtpResponse The response object containing the result of the deletion.

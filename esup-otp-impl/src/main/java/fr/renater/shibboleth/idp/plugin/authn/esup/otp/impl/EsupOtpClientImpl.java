@@ -41,7 +41,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     private final DefaultEsupOtpIntegration esupOtpIntegration;
 
     private final EsupOtpEncoder encoder;
-    
+
     /**
      * Constructor.
      *
@@ -53,8 +53,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
         this.esupOtpIntegration = integration;
         this.encoder = new EsupOtpEncoder(integration.getUsersSecret());
     }
-   
-    
+
     /** {@inheritDoc} */
     public EsupOtpUserInfoResponse getOtpUserInfos(final String uid) throws EsupOtpClientException {
         try {
@@ -146,7 +145,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     }
 
     /** {@inheritDoc} */
-    public boolean postVerifyWebauthn(final String uid, @Nonnull final EsupOtpVerifyWebAuthnRequest body) 
+    public boolean postVerifyWebauthn(final String uid, @Nonnull final EsupOtpVerifyWebAuthnRequest body)
             throws EsupOtpClientException {
         try {
             final String hash = encoder.getUserHash(uid);
@@ -199,7 +198,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     }
 
     /** {@inheritDoc} */
-    public void putDeactivateMethodTransport(final String method, final String transport) 
+    public void putDeactivateMethodTransport(final String method, final String transport)
             throws EsupOtpClientException {
         put(EsupOtpUriConstants.Admin.PUT_DEACTIVATE_TRANSPORT, method, transport);
     }

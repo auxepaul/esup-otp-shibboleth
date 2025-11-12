@@ -38,7 +38,7 @@ import net.shibboleth.shared.primitive.LoggerFactory;
 /**
  * An action that derives a username from a lookup strategy, get otp code from form or header,
  * creates a {@link EsupOtpContext}, and attaches it to the {@link AuthenticationContext}.
- * 
+ *
  * @event {@link org.opensaml.profile.action.EventIds#PROCEED_EVENT_ID}
  * @event {@link AuthnEventIds#NO_CREDENTIALS}
  * @event {@link AuthnEventIds#INVALID_CREDENTIALS}
@@ -51,10 +51,10 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
     @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpExtractionAction.class);
 
     private static final String CLIENT_EXCEPTION = "ClientException";
-    
+
     /** Lookup strategy for username to use in resolving token seeds. */
     @Nonnull private Function<ProfileRequestContext, String> usernameLookupStrategy;
-    
+
     /** Creation strategy for esup otp context. */
     @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextCreationStrategy;
 
@@ -86,25 +86,25 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
 
     /**
      * Set the lookup strategy to use for the username to use in resolving token seeds.
-     * 
+     *
      * @param strategy lookup strategy
      */
     public void setUsernameLookupStrategy(@Nonnull final Function<ProfileRequestContext,String> strategy) {
         checkSetterPreconditions();
-        
+
         usernameLookupStrategy = Constraint.isNotNull(strategy, "Username lookup strategy cannot be null");
     }
 
     /**
      * Set the lookup strategy to locate/create the {@link EsupOtpContext}.
-     * 
+     *
      * @param strategy lookup/creation strategy
      */
     public void setEsupOtpContextCreationStrategy(
             @Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
         checkSetterPreconditions();
-        
-        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy, 
+
+        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy,
                 "EsupOtpContext creation strategy cannot be null");
     }
 
@@ -129,7 +129,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             throw new ComponentInitializationException("EsupOtp Client Registry cannot be null");
         }
     }
-    
+
     /** {@inheritDoc} */
     @Override
     protected void doExecute(@Nonnull final ProfileRequestContext profileRequestContext,
@@ -137,7 +137,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
 
         // Clear error state.
         authenticationContext.removeSubcontext(AuthenticationErrorContext.class);
-        
+
         final EsupOtpContext esupOtpContext = esupOtpContextCreationStrategy.apply(authenticationContext);
         if (esupOtpContext == null) {
             log.warn("{} Unable to create esup otp context", getLogPrefix());
@@ -153,9 +153,9 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         }
 
         final EsupOtpClient client = clientRegistry.getClientOrCreate(esupOtpIntegration);
-        
+
         esupOtpContext.setTokenCode(null);
-        
+
         // Fill in username if not set.
         if (esupOtpContext.getUsername() == null) {
             final String username = usernameLookupStrategy.apply(profileRequestContext);
@@ -166,7 +166,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             }
             esupOtpContext.setUsername(username);
         }
-        
+
         final HttpServletRequest request = getHttpServletRequest();
         if (request == null) {
             log.warn("{} Profile action does not contain an HttpServletRequest", getLogPrefix());
@@ -174,7 +174,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             return;
         }
 
-        // In case of resend we reuse transport already choose.
+        // In case of resend we reuse transport already chosen.
         if (esupOtpContext.getTransportChoose() == null) {
             final String transport = extractTransport(request);
             if(transport == null) {
@@ -187,7 +187,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
         } else {
             log.debug("Reuse transport choose : {}", esupOtpContext.getTransportChoose());
         }
-        
+
         Map<String, String> configuredTransports = esupOtpContext.getConfiguredTransports();
         if(configuredTransports == null || configuredTransports.isEmpty()) {
             log.debug("{} Profile action does not contain configured transports", getLogPrefix());
@@ -224,13 +224,13 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
     /**
      * Gets the transport choose from the HTTP request.
      * First get from form request (input "transportchoose"),
-     * 
+     *
      * @param httpRequest current HTTP request
-     * 
+     *
      * @return the token code, or null
      */
     @Nullable protected String extractTransport(@Nonnull final HttpServletRequest httpRequest) {
         return httpRequest.getParameter("transportchoose");
     }
-    
+
 }

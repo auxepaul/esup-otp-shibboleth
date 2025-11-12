@@ -22,33 +22,33 @@ public class UserMethods {
 
     /** waiting for if push or esupnfc is active. */
     private boolean waitingFor;
-    
+
     /** totp user method. */
     private UserMethod totp;
-    
+
     /** webauthn user method. */
     private UserMethod webauthn;
-    
+
     /** random code (totp) user method. */
     @JsonProperty("random_code")
     private UserMethod randomCode;
-    
+
     /** random code (by mail) user method. */
     @JsonProperty("random_code_mail")
     private UserMethod randomCodeMail;
-    
+
     /** bypass user method. */
     private UserMethod bypass;
     
     /** push user method. */
     private UserMethod push;
-    
+
     /** nfc user method. */
     private UserMethod esupnfc;
-    
+
     /**
      * Get user methods by type.
-     * 
+     *
      * @return all user methods.
      */
     @JsonIgnore
@@ -63,17 +63,17 @@ public class UserMethods {
         userMethodByType.put("esupnfc", esupnfc);
         return userMethodByType;
     }
-    
+
     /**
      * User method dto.
      */
     @Data
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class UserMethod {
-    
+
         /** Boolean to get if method is active or not. */
         private boolean active;
-        
+
         /** List of transports available for this method. */
         private List<String> transports;
 
@@ -96,6 +96,6 @@ public class UserMethods {
 
         /** Device dto set only for push method. */
         private Device device;
-        
+
     }
 }
