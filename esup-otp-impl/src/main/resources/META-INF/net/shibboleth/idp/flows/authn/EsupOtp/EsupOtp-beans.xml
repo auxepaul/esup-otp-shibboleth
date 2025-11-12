@@ -109,7 +109,7 @@
           p:issuer="%{idp.esup.otp.issuer}"
           p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
           p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:}"
-          p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,random_code,random_code_mail}"
+          p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,passcode_grid,random_code,random_code_mail}"
           p:maxRetry="%{idp.esup.otp.send.counter:3}" />
     <bean id="EsupOtpIntegrationStrategy" parent="shibboleth.Functions.Constant"
           c:target-ref="DefaultEsupOtpIntegration" />

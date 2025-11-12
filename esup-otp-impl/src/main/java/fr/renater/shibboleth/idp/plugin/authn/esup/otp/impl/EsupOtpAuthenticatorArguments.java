@@ -25,7 +25,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
     @Parameter(names = "--uid")
     @Nullable private String uid;
 
-    /** method (bypass, esupnfc, push, random_code_mail, random_code, totp, webauthn). */
+    /** method (bypass, passcode_grid, esupnfc, push, random_code_mail, random_code, totp, webauthn). */
     @Parameter(names = "--method")
     @Nullable private String method;
 
@@ -118,7 +118,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
         out.println(String.format("  --%-20s %s", "uid", "Specify user uid."));
         out.println(String.format("  --%-20s %s", "method",
                 "Specify method. By default it's set to totp."
-                + "Possible values : bypass, esupnfc, push, random_code_mail, random_code, totp, webauthn"));
+                + "Possible values : bypass, passcode_grid, esupnfc, push, random_code_mail, random_code, totp, webauthn"));
         out.println(String.format("  --%-20s %s", "transport", "Specify transport. By default it's set to sms."
                 + "Possible values : sms, mail, push"));
         out.println(String.format("  --%-20s %s", "userHash", "Specify userHash to call api."));

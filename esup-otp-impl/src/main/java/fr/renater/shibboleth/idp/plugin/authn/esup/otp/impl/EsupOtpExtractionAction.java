@@ -1,6 +1,7 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.BYPASS_METHOD;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.PASSCODE_GRID_METHOD;
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.SUPPORTED_METHODS_WITHOUT_TRANSPORT;
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.TOTP_METHOD;
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
@@ -200,7 +201,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
                 EsupOtpWebauthnResponse response = client.postGenerateWebauthnSecret(esupOtpContext.getUsername());
                 esupOtpContext.setWebauthnCredentialRequestOptions(WebauthnMapper.INSTANCE.toWebAuthnDto(response));
                 log.debug("Set WebauthnCredentialRequestOptions : {}", esupOtpContext.getWebauthnCredentialRequestOptions());
-            } else if(!BYPASS_METHOD.equals(esupOtpContext.getTransportChoose()) && !TOTP_METHOD.equals(esupOtpContext.getTransportChoose())) {
+            } else if(!BYPASS_METHOD.equals(esupOtpContext.getTransportChoose()) && !PASSCODE_GRID_METHOD.equals(esupOtpContext.getTransportChoose()) && !TOTP_METHOD.equals(esupOtpContext.getTransportChoose())) {
                 if(esupOtpContext.getSendCounter() > esupOtpIntegration.getMaxRetry()) {
                     log.warn("{} send message already tried {}", getLogPrefix(), esupOtpContext.getSendCounter());
                 } else {
@@ -215,8 +216,7 @@ public class EsupOtpExtractionAction extends AbstractAuthenticationAction {
             }
         } catch (EsupOtpClientException e) {
             log.error("{} Send message with option '{}' to '{}' failed", getLogPrefix(), esupOtpContext.getTransportChoose(), esupOtpContext.getUsername(), e);
-            authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(
-                    CLIENT_EXCEPTION);
+            authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors().add(CLIENT_EXCEPTION);
             ActionSupport.buildEvent(profileRequestContext, CLIENT_EXCEPTION);
         }
     }

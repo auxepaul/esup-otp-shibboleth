@@ -39,7 +39,11 @@ public class UserMethods {
 
     /** bypass user method. */
     private UserMethod bypass;
-    
+
+    /** passcode_grid user method. */
+    @JsonProperty("passcode_grid")
+    private UserMethod passcodeGrid;
+
     /** push user method. */
     private UserMethod push;
 
@@ -59,6 +63,7 @@ public class UserMethods {
         userMethodByType.put("random_code", randomCode);
         userMethodByType.put("random_code_mail", randomCodeMail);
         userMethodByType.put("bypass", bypass);
+        userMethodByType.put("passcode_grid", passcodeGrid);
         userMethodByType.put("push", push);
         userMethodByType.put("esupnfc", esupnfc);
         return userMethodByType;

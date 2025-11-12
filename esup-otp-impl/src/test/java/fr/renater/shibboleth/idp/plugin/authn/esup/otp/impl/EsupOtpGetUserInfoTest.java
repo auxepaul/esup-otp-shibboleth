@@ -47,7 +47,7 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();
         defaultEsupOtpIntegration.setAPIHost("https://tobedefine.fr");
         defaultEsupOtpIntegration.setUsersSecret("anUsersSecret");
-        defaultEsupOtpIntegration.setSupportedMethods(List.of("random_code", "push", "bypass"));
+        defaultEsupOtpIntegration.setSupportedMethods(List.of("random_code", "push", "bypass", "passcode_grid"));
         defaultEsupOtpIntegration.initialize();
 
         action.setEsupOtpIntegrationLookupStrategy(prc -> defaultEsupOtpIntegration);
