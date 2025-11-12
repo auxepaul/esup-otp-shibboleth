@@ -130,6 +130,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
 
                 <ul>
+                    <li><a href="${managerLink}">#springMessageText("idp.esup.otp.updatechoices", "Update your authentication choices?")</a></li>
                     <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>
                     <li><a href="#springMessageText("idp.url.helpdesk", '#')">#springMessageText("idp.login.needHelp", "Need Help?")</a></li>
                 </ul>

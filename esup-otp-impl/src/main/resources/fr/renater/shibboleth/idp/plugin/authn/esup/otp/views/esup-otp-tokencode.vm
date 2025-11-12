@@ -22,6 +22,8 @@
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
 ##
 #set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
+#set ($managerLink = $environment.getProperty("idp.esup.otp.manager.link"))
+##
 #if ("push" == $esupOtpContext.getTransportChoose() || "webauthn" == $esupOtpContext.getTransportChoose())
     #set ($apiUrl = $environment.getProperty("idp.esup.otp.apiHost"))
 #end
