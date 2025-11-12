@@ -14,14 +14,14 @@
 
 ## Description
 
-Esup Otp Shibboleth est un plugin Shibboleth.
+Esup Otp Shibboleth est un plugin de l'IdP Shibboleth.
 
-Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il permet d'appeler l'api REST esup-otp
+Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il permet d'appeler l'api REST esup-otp-api
 
 
 | Plugin ID                      | Module(s)         | Authentication Flow ID |
 |--------------------------------|-------------------|------------------------|
-| fr.renater.shibboleth.esup.otp | idp.authn.esupotp | authn/EsupOtp          |
+| fr.renater.shibboleth.esup.otp | idp.authn.EsupOtp | authn/EsupOtp          |
 
 ## Build
 
@@ -43,7 +43,7 @@ La clef publique devra être ajoutée au préalable du build dans le fichier `es
 
 La ligne de commande pour signer l'archive est la suivante : 
 ```
-  gpg -u USER_A_REMPLACER -ab esup-otp-dist/target/shibboleth-esup-otp-${version}.tar.gz
+  gpg -u USER_A_REMPLACER -ab esup-otp-dist/target/idp-plugin-esup-otp-${version}.tar.gz
 ```
 
 ## Installation
