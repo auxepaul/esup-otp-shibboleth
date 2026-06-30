@@ -27,7 +27,7 @@ Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il perme
 
 ### Prérequis
 
-- OpenJDK 17
+- OpenJDK 21
 - Maven 3.8 ou supérieur
 
 ```
@@ -129,7 +129,7 @@ Par exemple :
 
 ### Development
 
-Java 17, Spring framework 6, Lombok
+Java 21, Spring framework 7, Lombok
 
 ## License
 

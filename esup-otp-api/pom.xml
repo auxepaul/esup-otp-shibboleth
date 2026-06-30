@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>fr.renater.shibboleth.esup.otp</groupId>
-        <artifactId>idp-plugin-esup-otp-parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
+        <artifactId>idp-plugin-esup-otp</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow API</name>
     <description>Esup-Otp plugin api.</description>
     <artifactId>esup-otp-api</artifactId>
     <packaging>jar</packaging>
-    
+
     <properties>
         <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
         <automatic.module.name>fr.renater.shibboleth.esup.otp.api</automatic.module.name>
@@ -34,12 +35,12 @@
             <artifactId>shib-support</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>com.google.code.findbugs</groupId>
             <artifactId>jsr305</artifactId>
             <scope>provided</scope>
-        </dependency>      
+        </dependency>
         <dependency>
             <groupId>${httpclient.httpcore.groupId}</groupId>
             <artifactId>${httpclient.httpcore.artifactId}</artifactId>
@@ -61,13 +62,12 @@
             <scope>provided</scope>
         </dependency>
 
-
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -76,14 +76,13 @@
 
         <!-- Runtime Dependencies -->
 
-        <!-- Test Dependencies -->
         <!-- Test dependencies -->
         <dependency>
             <groupId>net.shibboleth</groupId>
             <artifactId>shib-testing</artifactId>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>${spring.groupId}</groupId>
             <artifactId>spring-test</artifactId>
@@ -92,5 +91,5 @@
 
         <!-- Managed Dependencies -->
     </dependencies>
-    
+
 </project>

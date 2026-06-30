@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>fr.renater.shibboleth.esup.otp</groupId>
-        <artifactId>idp-plugin-esup-otp-parent</artifactId>
-        <version>1.0.3-SNAPSHOT</version>
-        <!--<relativePath>../pom.xml</relativePath>-->
+        <artifactId>idp-plugin-esup-otp</artifactId>
+        <version>1.1.0-SNAPSHOT</version>
+        <!--relativePath>../pom.xml</relativePath-->
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow Impl</name>
     <description>Esup-Otp plugin implementation.</description>
     <artifactId>esup-otp-impl</artifactId>
     <packaging>jar</packaging>
-    
+
     <properties>
         <checkstyle.configLocation>${project.basedir}/../resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
         <automatic.module.name>fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl</automatic.module.name>
@@ -27,6 +28,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>esup-otp-api</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
@@ -63,7 +65,7 @@
             <artifactId>idp-core</artifactId>
             <scope>provided</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.opensaml</groupId>
             <artifactId>opensaml-messaging-api</artifactId>
@@ -190,6 +192,7 @@
         </dependency>
 
         <!-- Managed Dependencies -->
+
     </dependencies>
 
     <build>
@@ -232,7 +235,6 @@
                             <artifactId>lombok-mapstruct-binding</artifactId>
                             <version>0.2.0</version>
                         </path>
-                        <!-- other annotation processors -->
                     </annotationProcessorPaths>
                 </configuration>
             </plugin>

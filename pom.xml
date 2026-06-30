@@ -1,31 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.shibboleth</groupId>
         <artifactId>parent</artifactId>
-        <version>17.1.5</version>
+        <version>17.2.2</version>
     </parent>
 
     <name>Shibboleth IdP :: Plugins :: Esup-Otp Login Flow</name>
     <description>An IdP plugin providing Esup-Otp login support.</description>
     <groupId>fr.renater.shibboleth.esup.otp</groupId>
-    <artifactId>idp-plugin-esup-otp-parent</artifactId>
-    <version>1.0.3-SNAPSHOT</version>
+    <artifactId>idp-plugin-esup-otp</artifactId>
+    <version>1.1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <properties>
+        <java.version>21</java.version>
+
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
         <shibboleth.projectName>java-idp-plugin-esup-otp</shibboleth.projectName>
+
         <idp.groupId>net.shibboleth.idp</idp.groupId>
-        <idp.version>5.1.5</idp.version>
-        <opensaml.version>5.1.5</opensaml.version>
-        <shib-shared.version>9.1.5</shib-shared.version>
+        <idp.version>5.2.1</idp.version>
+        <opensaml.version>5.2.1</opensaml.version>
+        <shib-profile.version>5.2.1</shib-profile.version>
+
+        <slf4j.version>2.0.18</slf4j.version>
+        <logback.version>1.5.34</logback.version>
+
+        <lombok.version>1.18.46</lombok.version>
+
+        <jcommander>3.0</jcommander>
+
+        <mockito.version>5.23.0</mockito.version>
+        <testng.version>7.12.0</testng.version>
+
         <checkstyle.configLocation>${project.basedir}/resources/checkstyle/checkstyle.xml</checkstyle.configLocation>
-        <lombok.version>1.18.38</lombok.version>
+        <lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
     </properties>
+
+
+    <repositories>
+        <repository>
+            <id>shibboleth-releases</id>
+            <url>https://build.shibboleth.net/maven/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>shibboleth-snapshots</id>
+            <url>https://build.shibboleth.net/maven/snapshots</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+        <repository>
+            <id>jboss</id>
+            <url>https://repository.jboss.org</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
     <dependencies>
         <!-- Compile Dependencies -->
@@ -35,7 +88,7 @@
         <!-- Runtime Dependencies -->
 
         <!-- Test Dependencies -->
-        
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
@@ -59,7 +112,7 @@
 
         <!-- Managed Dependencies -->
     </dependencies>
-    
+
     <dependencyManagement>
         <dependencies>
             <!-- Esup Otp client dependency -->
@@ -69,11 +122,11 @@
                 <version>${project.version}</version>
             </dependency>
 
-            <dependency>
+            <!--dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>esup-otp-impl</artifactId>
                 <version>${project.version}</version>
-            </dependency>
+            </dependency-->
 
             <!-- IdP BOM when importing IdP dependencies -->
             <dependency>
@@ -86,11 +139,11 @@
             <dependency>
                 <groupId>net.shibboleth</groupId>
                 <artifactId>shib-profile-bom</artifactId>
-                <version>${idp.version}</version>
+                <version>${shib-profile.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <dependency>
+            <!--dependency>
                 <groupId>net.shibboleth</groupId>
                 <artifactId>shib-attribute-bom</artifactId>
                 <version>${idp.version}</version>
@@ -110,7 +163,7 @@
                 <version>${shib-shared.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
+            </dependency-->
 
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -121,8 +174,28 @@
         </dependencies>
     </dependencyManagement>
 
+
+    <modules>
+        <module>esup-otp-api</module>
+        <module>esup-otp-impl</module>
+        <!-- All DIST modules must come after the -api and -impl modules -->
+        <module>esup-otp-dist</module>
+    </modules>
+
     <build>
         <plugins>
+            <plugin>
+                <groupId>net.shibboleth.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <links combine.children="append">
+                        <link>
+                            ${javadoc.url}/java-shib-profile/${shib-profile.version}</link>
+                        <link>
+                            ${javadoc.url}/java-identity-provider/${idp.version}</link>
+                    </links>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -133,7 +206,7 @@
                             <Automatic-Module-Name>${automatic.module.name}</Automatic-Module-Name>
                             <Implementation-Title>${project.artifactId}</Implementation-Title>
                             <Implementation-Version>${project.version}</Implementation-Version>
-                            <Sealed>false</Sealed>
+                            <Sealed>true</Sealed>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -141,11 +214,9 @@
         </plugins>
     </build>
 
-    <modules>
-        <module>esup-otp-impl</module>
-        <module>esup-otp-api</module>
-        <!-- All DIST modules must come after the -api and -impl modules -->
-        <module>esup-otp-dist</module>
-    </modules>
+    <organization>
+        <name>RENATER</name>
+        <url>https://www.renater.fr</url>
+    </organization>
     
 </project>
