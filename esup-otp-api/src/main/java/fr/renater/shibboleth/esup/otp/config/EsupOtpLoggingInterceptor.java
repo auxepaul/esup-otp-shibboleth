@@ -15,33 +15,32 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
-
-import net.shibboleth.shared.primitive.LoggerFactory;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.StreamUtils;
+
+import lombok.CustomLog;
 
 /**
  * Esup otp http client interceptor to log requests.
  */
 @Order(2)
+@CustomLog
 public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
 
-    /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpLoggingInterceptor.class);
+    // TODO Sanitizers à vérifier ou remplacer par quelquechose de plus robuste
 
     private static final String EMAIL_REGEX = "([a-zA-Z0-9._%+-]+)@([a-zA-Z0-9.-]+)";
 
     private static final List<String> HEADERS_TO_SANITIZE = Arrays.asList("Authorization", "Cookie");
 
     /** {@inheritDoc} */
-    public @Nonnull ClientHttpResponse intercept(@Nonnull final HttpRequest request, 
-            @Nonnull final byte[] body, @Nonnull final ClientHttpRequestExecution execution) throws IOException {
+    public @Nonnull ClientHttpResponse intercept(@Nonnull final HttpRequest request, @Nonnull final byte[] body,
+            @Nonnull final ClientHttpRequestExecution execution) throws IOException {
         logRequest(request, body);
         final ClientHttpResponse response = execution.execute(request, body);
         logResponse(response);
@@ -51,8 +50,10 @@ public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
     /**
      * Log as debug request.
      *
-     * @param request http request.
-     * @param body request body.
+     * @param request
+     *            http request.
+     * @param body
+     *            request body.
      */
     private void logRequest(@Nonnull final HttpRequest request, @Nonnull final byte[] body) {
         log.debug("==========================request begin==========================");
@@ -61,7 +62,7 @@ public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
         log.debug("Headers     : {}", sanitizeHeaders(request.getHeaders()));
         if (body.length > 1) {
             final InputStreamReader isr = new InputStreamReader(new ByteArrayInputStream(body), StandardCharsets.UTF_8);
-            try(BufferedReader br = new BufferedReader(isr)) {
+            try (BufferedReader br = new BufferedReader(isr)) {
                 final String requestBody = br.lines().collect(Collectors.joining("\n"));
                 log.debug("Request body: {}", requestBody);
             } catch (final IOException e) {
@@ -74,7 +75,8 @@ public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
     /**
      * Log as debug response.
      *
-     * @param response from esup-otp-api server.
+     * @param response
+     *            from esup-otp-api server.
      */
     private void logResponse(@Nonnull final ClientHttpResponse response) {
         log.debug("==========================response begin==========================");
@@ -92,7 +94,8 @@ public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
     /**
      * Sanitize request URI, if request contain email address.
      *
-     * @param request URI.
+     * @param request
+     *            URI.
      * @return URI decoded and sanitized.
      */
     private String sanitizeRequest(URI request) {
@@ -117,36 +120,33 @@ public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
     /**
      * Sanitize headers.
      *
-     * @param headers request or response headers.
+     * @param headers
+     *            request or response headers.
      * @return sanitized headers as String
      */
     private String sanitizeHeaders(MultiValueMap<String, String> headers) {
         return headers.entrySet().stream()
-                .map(entry ->
-                    entry.getKey() + ":" + getValues(entry.getValue(), HEADERS_TO_SANITIZE.contains(entry.getKey()))
-                )
+                .map(entry -> entry.getKey() + ":"
+                        + getValues(entry.getValue(), HEADERS_TO_SANITIZE.contains(entry.getKey())))
                 .collect(Collectors.joining(", ", "[", "]"));
     }
 
     private String getValues(List<String> values, boolean sanitize) {
-        if(sanitize) {
-            return values.size() == 1 ?
-                    "\"" + sanitize(values.get(0)) + "\"" :
-                    values.stream().map(s -> "\"" + sanitize(s) + "\"").collect(Collectors.joining(", "));
+        if (sanitize) {
+            return values.size() == 1 ? "\"" + sanitize(values.get(0)) + "\""
+                    : values.stream().map(s -> "\"" + sanitize(s) + "\"").collect(Collectors.joining(", "));
         } else {
-            return values.size() == 1 ?
-                    "\"" + values.get(0) + "\"" :
-                    values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", "));
+            return values.size() == 1 ? "\"" + values.get(0) + "\""
+                    : values.stream().map(s -> "\"" + s + "\"").collect(Collectors.joining(", "));
         }
     }
 
     private String sanitize(String value) {
-        if(value.length() <= 4) {
+        if (value.length() <= 4) {
             return "****";
         }
-        return value.charAt(0) +
-                value.substring(1, value.length() - 2).replaceAll("[^ ]", "*") +
-                value.charAt(value.length() - 1);
+        return value.charAt(0) + value.substring(1, value.length() - 2).replaceAll("[^ ]", "*")
+                + value.charAt(value.length() - 1);
     }
 
 }

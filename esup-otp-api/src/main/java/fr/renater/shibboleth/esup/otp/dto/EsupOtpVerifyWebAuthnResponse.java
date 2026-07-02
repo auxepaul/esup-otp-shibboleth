@@ -2,14 +2,20 @@ package fr.renater.shibboleth.esup.otp.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Esup otp verify dto response.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
 @EqualsAndHashCode(callSuper = true)
 public class EsupOtpVerifyWebAuthnResponse extends EsupOtpResponse {
 

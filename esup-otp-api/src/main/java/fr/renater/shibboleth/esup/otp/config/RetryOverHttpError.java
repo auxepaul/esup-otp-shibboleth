@@ -3,29 +3,24 @@ package fr.renater.shibboleth.esup.otp.config;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import javax.annotation.Nonnull;
-
 import org.apache.hc.client5.http.HttpRequestRetryStrategy;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.util.TimeValue;
-import org.slf4j.Logger;
 
-import net.shibboleth.shared.primitive.LoggerFactory;
+import lombok.CustomLog;
 
 /**
- * Class to manager if request is retryable or not.
+ * Class to manage if the request is retryable or not.
  */
+@CustomLog
 public class RetryOverHttpError implements HttpRequestRetryStrategy {
 
-    /** Class logger. */
-    @Nonnull
-    private final Logger log = LoggerFactory.getLogger(RetryOverHttpError.class);
 
     @Override
-    public boolean retryRequest(
-            final HttpRequest request, final IOException exception, final int execCount, final HttpContext context) {
+    public boolean retryRequest(final HttpRequest request, final IOException exception, final int execCount,
+            final HttpContext context) {
         // Do not retry if over max retry count
         return execCount <= 5;
     }

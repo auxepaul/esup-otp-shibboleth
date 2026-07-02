@@ -11,7 +11,10 @@ import javax.annotation.concurrent.GuardedBy;
 import javax.annotation.concurrent.ThreadSafe;
 import javax.security.auth.Subject;
 
-import org.slf4j.Logger;
+import lombok.CustomLog;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Synchronized;
 
 import net.shibboleth.idp.authn.principal.PrincipalSupportingComponent;
 import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
@@ -22,65 +25,82 @@ import net.shibboleth.shared.annotation.constraint.Unmodifiable;
 import net.shibboleth.shared.collection.CollectionSupport;
 import net.shibboleth.shared.component.AbstractInitializableComponent;
 import net.shibboleth.shared.logic.Constraint;
-import net.shibboleth.shared.primitive.LoggerFactory;
 import net.shibboleth.shared.primitive.StringSupport;
 
 /**
  * Wrapper for use of esup otp api.
  */
 @ThreadSafe
-public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent implements PrincipalSupportingComponent {
-
-    /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(DefaultEsupOtpIntegration.class);
+@NoArgsConstructor
+@CustomLog
+public final class DefaultEsupOtpIntegration extends AbstractInitializableComponent
+        implements PrincipalSupportingComponent {
 
     /** API host. */
-    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiHost;
+    @GuardedBy("this")
+    @NonnullAfterInit
+    @NotEmpty
+    private String apiHost;
 
     /** Integration key. */
-    @GuardedBy("this") @Nullable private String clientId;
+    @GuardedBy("this")
+    @Nullable
+    private String clientId;
 
     /** Secret key. */
-    @GuardedBy("this") @Nullable private String secretKey;
+    @GuardedBy("this")
+    @Nullable
+    @Getter(onMethod_ = { @Synchronized })
+    private String secretKey;
 
     /** Users secret. */
-    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String usersSecret;
+    @GuardedBy("this")
+    @NonnullAfterInit
+    @NotEmpty
+    @Getter(onMethod_ = { @Synchronized })
+    private String usersSecret;
 
     /** API password. */
-    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String apiPassword;
+    @GuardedBy("this")
+    @NonnullAfterInit
+    @NotEmpty
+    @Getter(onMethod_ = { @Synchronized })
+    private String apiPassword;
 
     /** Issuer. */
-    @GuardedBy("this") @NonnullAfterInit @NotEmpty private String issuer;
-
-    /** The used (by clients) redirect_uri to send the client after authorisation. */
-    @GuardedBy("this") @Nullable private String redirectURI;
-
-    /** A statically set (pre-registered) redirectURI to send the client to after authorisation. */
-    @GuardedBy("this") @Nullable private String registeredRedirectURI;
-
-    /** The URL path to the health endpoint. */
-    @GuardedBy("this") @Nullable private String healthEndpoint;
+    @GuardedBy("this")
+    @NonnullAfterInit
+    @NotEmpty
+    @Getter(onMethod_ = { @Synchronized })
+    private String issuer;
 
     /** The list of supported methods for otp. */
-    @GuardedBy("this") @Nonnull @NonnullElements private Set<String> supportedMethods;
+    @GuardedBy("this")
+    @Nonnull
+    @NonnullElements
+    @Getter(onMethod_ = { @Synchronized })
+    private Set<String> supportedMethods = new HashSet<>();
 
     /** The max send counter. */
-    @GuardedBy("this") private int maxRetry;
+    @GuardedBy("this")
+    @Getter(onMethod_ = { @Synchronized })
+    private int maxRetry;
+
+    /** The otp code length. */
+    @GuardedBy("this")
+    @Getter(onMethod_ = { @Synchronized })
+    private int codeLength;
 
     /** The supported principal subject. */
-    @GuardedBy("this") @Nonnull private final Subject supportedPrincipals;
+    @GuardedBy("this")
+    @Nonnull
+    @Getter(onMethod_ = { @Synchronized })
+    private final Subject supportedPrincipals = new Subject();
 
-    /**
-     * Constructor.
-     *
-     */
-    public DefaultEsupOtpIntegration() {
-        supportedMethods = new HashSet<String>();
-        supportedPrincipals = new Subject();
-    }
-
-    /** {@inheritDoc} */
-    @Nonnull @NotEmpty public synchronized String getAPIHost() {
+    @Nonnull
+    @NotEmpty
+    @Synchronized
+    public String getAPIHost() {
         checkComponentActive();
         assert apiHost != null;
         return apiHost;
@@ -89,172 +109,121 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     /**
      * Set the API host to use.
      *
-     * @param host API host
+     * @param host
+     *            API host
      */
-    public synchronized void setAPIHost(@Nonnull @NotEmpty final String host) {
+    @Synchronized
+    public void setAPIHost(@Nonnull @NotEmpty final String host) {
         checkSetterPreconditions();
         apiHost = Constraint.isNotNull(StringSupport.trimOrNull(host), "API host cannot be null or empty");
     }
 
-    /**
-     * Set the client ID to use.
-     *
-     * @param id the client identifier.
-     */
-    public synchronized void setClientId(@Nullable final String id) {
-        checkSetterPreconditions();
-        clientId = Constraint.isNotNull(StringSupport.trimOrNull(id), "ClientID cannot be null or empty");
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getClientId() {
+    @Nullable
+    @Synchronized
+    public String getClientId() {
         checkComponentActive();
         return clientId;
     }
 
     /**
-     * Set the secret key to use.
+     * Set the client ID to use.
      *
-     * @param key secret key
+     * @param id
+     *            the client identifier.
      */
-    public synchronized void setSecretKey(@Nullable final String key) {
+    @Synchronized
+    public void setClientId(@Nullable final String id) {
         checkSetterPreconditions();
-        secretKey = Constraint.isNotNull(StringSupport.trimOrNull(key), "Secret key cannot be null or empty");
+        clientId = Constraint.isNotNull(StringSupport.trimOrNull(id), "ClientID cannot be null or empty");
     }
 
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getSecretKey() {
-        checkComponentActive();
-        return secretKey;
+    /**
+     * Set the secret key to use.
+     *
+     * @param key
+     *            secret key
+     */
+    @Synchronized
+    public void setSecretKey(@Nullable final String key) {
+        checkSetterPreconditions();
+        secretKey = Constraint.isNotNull(StringSupport.trimOrNull(key), "Secret key cannot be null or empty");
     }
 
     /**
      * Set the users secret to use.
      *
-     * @param usrSecret secret key
+     * @param secret
+     *            secret key
      */
-    public synchronized void setUsersSecret(@Nonnull @NotEmpty final String secret) {
+    @Synchronized
+    public void setUsersSecret(@Nonnull @NotEmpty final String secret) {
         checkSetterPreconditions();
         usersSecret = StringSupport.trimOrNull(secret);
-    }
-
-    /** {@inheritDoc} */
-    @NotEmpty public synchronized String getUsersSecret() {
-        return usersSecret;
     }
 
     /**
      * Set the api password to use.
      *
-     * @param apiPwd secret key
+     * @param password
+     *            secret key
      */
-    public synchronized void setApiPassword(@Nullable final String password) {
+    @Synchronized
+    public void setApiPassword(@Nullable final String password) {
         checkSetterPreconditions();
         apiPassword = StringSupport.trimOrNull(password);
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getApiPassword() {
-        return apiPassword;
     }
 
     /**
      * Set the issuer to use.
      *
-     * @param iss generally equal to ${idp.entityID}
+     * @param iss
+     *            generally equal to ${idp.entityID}
      */
-    public synchronized void setIssuer(@Nullable final String iss) {
+    @Synchronized
+    public void setIssuer(@Nullable final String iss) {
         checkSetterPreconditions();
         issuer = StringSupport.trimOrNull(iss);
     }
 
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getIssuer() {
-        return issuer;
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getRedirectURI() {
-        return redirectURI;
-    }
-
     /**
-     * Set the redirect_uri to use.
+     * Set the supportedMethods to use.
      *
-     * @param uri the redirect_uri
+     * @param methods
+     *            the methods allowed
      */
-    public synchronized void setRegisteredRedirectURI(@Nullable final String uri) {
-        checkSetterPreconditions();
-        registeredRedirectURI = StringSupport.trimOrNull(uri);
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getRegisteredRedirectURI() {
-        return registeredRedirectURI;
-    }
-
-    /** {@inheritDoc} */
-    @Nullable public synchronized String getHealthCheckEndpoint() {
-        checkComponentActive();
-        return healthEndpoint;
-    }
-
-    /**
-     * Set the health check endpoint URL path.
-     *
-     * @param endpoint the endpoint.
-     */
-    public synchronized void setHealthCheckEndpoint(@Nullable final String endpoint) {
-        checkSetterPreconditions();
-        healthEndpoint = StringSupport.trimOrNull(endpoint);
-    }
-
-    /** {@inheritDoc} */
-    public synchronized void setRedirectURIIfAbsent(
-            @Nonnull @NotEmpty final String computedRedirectURI){
-        // Specifically do not check if component has been initialized. This can change during use.
-        Constraint.isNotEmpty(computedRedirectURI, "Computed redirect URI can not be null or empty");
-
-        if (redirectURI == null) {
-            log.debug("Integration redirect_uri is being pinned to '{}'",computedRedirectURI);
-            redirectURI = computedRedirectURI;
-        }
-    }
-
-    /**
-     * Set the redirect_uri to use.
-     *
-     * @param methods the methods allowed
-     */
-    public synchronized void setSupportedMethods(@Nullable @NonnullElements final Collection<String> methods) {
+    @Synchronized
+    public void setSupportedMethods(@Nullable @NonnullElements final Set<String> methods) {
         checkSetterPreconditions();
         supportedMethods.clear();
 
-        if(methods != null && !methods.isEmpty()) {
+        if (methods != null && !methods.isEmpty()) {
             supportedMethods = CollectionSupport.copyToSet(StringSupport.normalizeStringCollection(methods));
         }
-    }
-
-    /** {@inheritDoc} */
-    @Nonnull public synchronized Set<String> getSupportedMethods() {
-        return supportedMethods;
     }
 
     /**
      * Set the max retry to use.
      *
-     * @param maxCounter int to define how many retry can be done to recall esup-otp-api
+     * @param maxCounter
+     *            int to define how many retry can be done to recall esup-otp-api
      */
-    public synchronized void setMaxRetry(final int maxCounter) {
+    @Synchronized
+    public void setMaxRetry(final int maxCounter) {
         checkSetterPreconditions();
         maxRetry = maxCounter;
     }
 
-    /** {@inheritDoc} */
-    public synchronized int getMaxRetry() {
-        return maxRetry;
+    /**
+     * Set the otp code length.
+     *
+     * @param length
+     *            int to define the totp code length
+     */
+    @Synchronized
+    public void setCodeLength(final int length) {
+        checkSetterPreconditions();
+        codeLength = length;
     }
-
 
     /** {@inheritDoc} */
     @Override
@@ -266,15 +235,21 @@ public final class DefaultEsupOtpIntegration extends AbstractInitializableCompon
     }
 
     /**
-     * Set supported non-user-specific principals that the action will include in the subjects
-     * it generates, in place of any default principals from the flow.
+     * Set supported non-user-specific principals that the action will include in
+     * the subjects it generates, in place of any default principals from the flow.
      *
-     * <p>Setting to a null or empty collection will maintain the default behavior of relying on the flow.</p>
+     * <p>
+     * Setting to a null or empty collection will maintain the default behavior of
+     * relying on the flow.
+     * </p>
      *
-     * @param <T> a type of principal to add, if not generic
-     * @param principals supported principals to include
+     * @param <T>
+     *            a type of principal to add, if not generic
+     * @param principals
+     *            supported principals to include
      */
-    public synchronized <T extends Principal> void setSupportedPrincipals(
+    @Synchronized
+    public <T extends Principal> void setSupportedPrincipals(
             @Nullable @NonnullElements final Collection<T> principals) {
         checkSetterPreconditions();
         supportedPrincipals.getPrincipals().clear();

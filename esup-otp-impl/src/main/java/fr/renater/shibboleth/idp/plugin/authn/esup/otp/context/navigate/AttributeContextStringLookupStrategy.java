@@ -1,32 +1,30 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.navigate;
 
+import java.util.List;
+
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
+
+import org.opensaml.profile.context.ProfileRequestContext;
+
+import lombok.CustomLog;
 import net.shibboleth.idp.attribute.IdPAttribute;
 import net.shibboleth.idp.attribute.IdPAttributeValue;
 import net.shibboleth.idp.attribute.ScopedStringAttributeValue;
 import net.shibboleth.idp.attribute.StringAttributeValue;
-import net.shibboleth.shared.primitive.LoggerFactory;
-import org.opensaml.profile.context.ProfileRequestContext;
-import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
-import java.util.List;
 
 /**
- * An {@link AbstractAttributeContextUserIdentityStrategy} that pulls out an {@link StringAttributeValue} from the 
- * attribute context. Will return {@code null} if the attribute can not be found, or if there is more than one 
- * attribute value.
+ * An {@link AbstractAttributeContextUserIdentityStrategy} that pulls out an
+ * {@link StringAttributeValue} from the attribute context. Will return
+ * {@code null} if the attribute can not be found, or if there is more than one attribute value.
  */
+@CustomLog
 @ThreadSafe
 public class AttributeContextStringLookupStrategy extends AbstractAttributeContextUserIdentityStrategy<String> {
-        
-    /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(AttributeContextStringLookupStrategy.class);
-        
     /** {@inheritDoc} */
     @Override
-    @Nullable public String apply(final ProfileRequestContext profileRequestContext) {
+    @Nullable
+    public String apply(final ProfileRequestContext profileRequestContext) {
         if (profileRequestContext == null) {
             return null;
         }
@@ -55,7 +53,7 @@ public class AttributeContextStringLookupStrategy extends AbstractAttributeConte
     }
 
     private void logDebugFoundAttribute(String attributeId, String attributeValue) {
-        if(log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             log.debug("{}: Found attribute '{}' with value '{}'", getId(), attributeId, attributeValue);
         }
     }

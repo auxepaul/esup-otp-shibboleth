@@ -1,10 +1,14 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.context;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.NonNull;
+import lombok.Setter;
+import lombok.ToString;
 import org.opensaml.messaging.context.BaseContext;
 
 import com.google.common.base.Strings;
@@ -16,16 +20,23 @@ import java.util.*;
 /**
  * Context class for state of a Esup otp validation.
  */
+@Getter
+@Setter
+@NoArgsConstructor
 public class EsupOtpContext extends BaseContext {
 
     /** The subject identifier with respect to the token "back-end". */
-    @Nullable @NotEmpty private String username;
+    @Nullable
+    @NotEmpty
+    private String username;
 
     /** The choices configured by the user. */
-    @Nullable private Set<String> enabledChoices;
+    @Nullable
+    private Set<String> enabledChoices = new HashSet<>();
 
     /** The possible transports configured by the user. */
-    @Nullable private Map<String, String> configuredTransports;
+    @Nullable
+    private Map<String, String> configuredTransports = new HashMap<>();
 
     /** The transport chosen. */
     @Nullable private String transportChoose;

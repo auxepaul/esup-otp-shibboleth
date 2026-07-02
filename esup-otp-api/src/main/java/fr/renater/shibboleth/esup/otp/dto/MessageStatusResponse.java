@@ -1,11 +1,17 @@
 package fr.renater.shibboleth.esup.otp.dto;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Dto when EsupOtpResponse message is an object.
  */
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
 public class MessageStatusResponse {
 
     /** message id. */

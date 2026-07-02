@@ -8,16 +8,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * List of user methods.
  */
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserMethods {
 
-    /** code required if totp, random_code, random_code_mail, bypass is active. */
+    /**
+     * code required if totp, random_code, random_code_mail, bypass, passcode_grid
+     * is active.
+     */
     private boolean codeRequired;
 
     /** waiting for if push or esupnfc is active. */
@@ -72,7 +83,11 @@ public class UserMethods {
     /**
      * User method dto.
      */
-    @Data
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class UserMethod {
 
@@ -88,7 +103,10 @@ public class UserMethods {
         /** Qr code not implemented yet in esup-otp-api. */
         private String qrCode;
 
-        /** List of codes not used yet for bypass method. Not returned with get user infos endpoint. */
+        /**
+         * List of codes not used yet for bypass method. Not returned with get user
+         * infos endpoint.
+         */
         private List<Integer> codes;
 
         /** Number of code available with bypass method. */

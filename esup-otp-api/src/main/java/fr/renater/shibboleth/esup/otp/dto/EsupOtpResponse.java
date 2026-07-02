@@ -4,24 +4,32 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import fr.renater.shibboleth.esup.otp.config.EsupOtpMessageDeserializer;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 /**
  * Esup otp base response.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class EsupOtpResponse {
 
     /**
-     * Code.
+     * Code
      */
     private String code;
-    
+
     /**
-     * Message.
+     * Message
      */
     @JsonDeserialize(using = EsupOtpMessageDeserializer.class)
     private Object message;
-    
+
 }

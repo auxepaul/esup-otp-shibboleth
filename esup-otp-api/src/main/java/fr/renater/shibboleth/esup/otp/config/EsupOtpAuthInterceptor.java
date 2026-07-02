@@ -10,10 +10,13 @@ import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.ClientHttpResponse;
 
+import lombok.AllArgsConstructor;
+
 /**
  * Esup otp http client interceptor for add Authorization header.
  */
 @Order(1)
+@AllArgsConstructor
 public class EsupOtpAuthInterceptor implements ClientHttpRequestInterceptor {
 
     /**
@@ -27,24 +30,14 @@ public class EsupOtpAuthInterceptor implements ClientHttpRequestInterceptor {
     private final String tenant;
 
     /**
-     *
-     * Constructor.
-     *
-     * @param apiPwd api_password to call esup-otp-api
-     * @param issuer tenant to call esup-otp-api
-     */
-    public EsupOtpAuthInterceptor(final String apiPwd, final String issuer) {
-        apiPassword = apiPwd;
-        tenant = issuer;
-    }
-
-    /**
      * Intercept request and add default authorization header.
-     *  
-     * <p>{@inheritDoc}</p> 
+     * 
+     * <p>
+     * {@inheritDoc}
+     * </p>
      */
-    public @Nonnull ClientHttpResponse intercept(@Nonnull final HttpRequest request, 
-            @Nonnull final byte[] body, @Nonnull final ClientHttpRequestExecution execution) throws IOException {
+    public @Nonnull ClientHttpResponse intercept(@Nonnull final HttpRequest request, @Nonnull final byte[] body,
+            @Nonnull final ClientHttpRequestExecution execution) throws IOException {
         // Add default authorization header
         request.getHeaders().add("Authorization", "Bearer " + apiPassword);
         // Add custom header to identify tenant
