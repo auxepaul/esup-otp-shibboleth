@@ -59,7 +59,7 @@ public class EsupOtpLoggingInterceptor implements ClientHttpRequestInterceptor {
         log.debug("==========================request begin==========================");
         log.debug("URI         : {}", sanitizeRequest(request.getURI()));
         log.debug("Method      : {}", request.getMethod());
-        log.debug("Headers     : {}", sanitizeHeaders(request.getHeaders()));
+        log.debug("Headers     : {}", sanitizeHeaders(request.getHeaders().asMultiValueMap()));
         if (body.length > 1) {
             final InputStreamReader isr = new InputStreamReader(new ByteArrayInputStream(body), StandardCharsets.UTF_8);
             try (BufferedReader br = new BufferedReader(isr)) {
