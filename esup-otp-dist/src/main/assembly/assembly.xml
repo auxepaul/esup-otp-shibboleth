@@ -16,7 +16,7 @@
                 <exclude>*sources.jar</exclude>
             </excludes>
         </fileSet>
-        <!--  Our API -->
+        <!-- Our API -->
         <fileSet>
             <directory>../esup-otp-api/target</directory>
             <outputDirectory>webapp/WEB-INF/lib</outputDirectory>
@@ -59,7 +59,7 @@
             <directory>src/main/resources/bootstrap</directory>
             <outputDirectory>bootstrap</outputDirectory>
             <includes>
-                <include>id.properties</include>
+                <include>id.property</include>
             </includes>
         </fileSet>
     </fileSets>
