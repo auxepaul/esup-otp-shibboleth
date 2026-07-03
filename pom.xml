@@ -15,7 +15,7 @@
     <description>An IdP plugin providing Esup-Otp login support.</description>
     <groupId>fr.renater.shibboleth.esup.otp</groupId>
     <artifactId>idp-plugin-esup-otp</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.1.0</version>
     <packaging>pom</packaging>
 
     <properties>
