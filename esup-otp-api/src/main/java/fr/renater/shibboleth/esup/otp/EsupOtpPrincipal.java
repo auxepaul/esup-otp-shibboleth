@@ -1,8 +1,10 @@
 package fr.renater.shibboleth.esup.otp;
 
+import java.util.StringJoiner;
+
 import javax.annotation.Nonnull;
 
-import com.google.common.base.MoreObjects;
+import org.springframework.javapoet.ClassName;
 
 import net.shibboleth.idp.authn.principal.CloneablePrincipal;
 import net.shibboleth.shared.annotation.ParameterName;
@@ -14,21 +16,26 @@ import net.shibboleth.shared.primitive.StringSupport;
 public class EsupOtpPrincipal implements CloneablePrincipal {
 
     /** The username. */
-    @Nonnull @NotEmpty
+    @Nonnull
+    @NotEmpty
     private String username;
 
     /**
-     * 
+     *
      * Constructor.
      *
-     * @param name the username
+     * @param name
+     *            the username
      */
-    public EsupOtpPrincipal(@Nonnull @NotEmpty @ParameterName(name="name") final String name) {
+    public EsupOtpPrincipal(@Nonnull @NotEmpty @ParameterName(name = "name") final String name) {
         username = Constraint.isNotNull(StringSupport.trimOrNull(name), "Username cannot be null or empty");
     }
 
     /** {@inheritDoc} */
-    @Nonnull @NotEmpty public String getName() {
+    @Override
+    @Nonnull
+    @NotEmpty
+    public String getName() {
         return username;
     }
 
@@ -59,12 +66,14 @@ public class EsupOtpPrincipal implements CloneablePrincipal {
     /** {@inheritDoc} */
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("username", username).toString();
+        return new StringJoiner(", ", ClassName.class.getSimpleName() + "[", "]").add("username=" + username)
+                .toString();
     }
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull public EsupOtpPrincipal clone() throws CloneNotSupportedException {
+    @Nonnull
+    public EsupOtpPrincipal clone() throws CloneNotSupportedException {
         final EsupOtpPrincipal copy = (EsupOtpPrincipal) super.clone();
         copy.username = username;
         return copy;
