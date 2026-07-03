@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.Setter;
 import lombok.ToString;
-import org.opensaml.messaging.context.BaseContext;
 
-import com.google.common.base.Strings;
+import org.opensaml.messaging.context.BaseContext;
 
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
 
@@ -38,203 +37,54 @@ public class EsupOtpContext extends BaseContext {
     @Nullable
     private Map<String, String> configuredTransports = new HashMap<>();
 
-    /** The transport chosen. */
-    @Nullable private String transportChoose;
+    /** The method chosen. */
+    @Nullable
+    private String methodChoice;
 
     /** The counter of send message done. */
     private int sendCounter;
 
     /** The webauthn dto. */
-    @Nullable private WebAuthnDto webauthnCredentialRequestOptions;
+    @Nullable
+    private WebAuthnDto webauthnCredentialRequestOptions;
 
-    /** A public key credential with assertion response that is the result of authentication.*/
-    @Nullable private WebAuthnPublicKeyCredential publicKeyCredentialAssertionResponse;
+    /**
+     * A public key credential with assertion response that is the result of
+     * authentication.
+     */
+    @Nullable
+    private WebAuthnPublicKeyCredential publicKeyCredentialAssertionResponse;
 
     /** The token code supplied. */
-    @Nullable private Integer tokenCode;
+    @Nullable
+    private Integer tokenCode;
 
+    /** The passcode_grid challenge supplied. */
+    @Nullable
+    private PasscodeGridChallenge passcodeGridChallenge;
 
-    /**
-     * Get the username.
-     *
-     * @return the username
-     */
-    @Nullable @NotEmpty public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Set the username.
-     *
-     * @param name the username
-     *
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setUsername(@Nullable @NotEmpty final String name) {
-        if (Strings.isNullOrEmpty(name)) {
-            username = null;
-        } else {
-            username = name;
+    public void setPasscodeGridChallenge(@NonNull Integer[] challenge)
+    {
+        if(challenge != null && challenge.length == 2) {
+           passcodeGridChallenge = new PasscodeGridChallenge(challenge[0],challenge[1]);
+        } else
+        {
+            // TODO générer une exception
         }
-
-        return this;
     }
-
-    /**
-     * Get the enabledChoices.
-     *
-     * @return the enabledChoices
-     */
-    public @Nullable List<String> getEnabledChoices() {
-        return enabledChoices != null ? enabledChoices.stream().toList() : new ArrayList<String>();
-    }
-
-    /**
-     * Set the enabledChoices.
-     *
-     * @param choices the possible choices for user
-     *
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setEnabledChoices(@Nullable final Set<String> choices) {
-        if(choices == null) {
-            enabledChoices = new HashSet<>();
-        } else {
-            enabledChoices = choices;
+    
+    @Getter
+    @ToString
+    public class PasscodeGridChallenge {
+        private Character line;
+        
+        private Integer column;
+        
+        
+        public PasscodeGridChallenge(int l, int c) {
+            line = (char) ('A' + l);
+            column = c + 1;
         }
-
-        return this;
     }
 
-    /**
-     * Get the configured transports.
-     *
-     * @return the configuredTransports
-     */
-    @Nullable public Map<String, String> getConfiguredTransports() {
-        return configuredTransports;
-    }
-
-    /**
-     * Set the configuredTransports.
-     *
-     * @param transportsByType the possible transports for user
-     *
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setConfiguredTransports(@Nullable final Map<String, String> transportsByType) {
-        if(transportsByType == null) {
-            configuredTransports = new HashMap<>();
-        } else {
-            configuredTransports = transportsByType;
-        }
-
-        return this;
-    }
-
-    /**
-     * Get the transport choose.
-     *
-     * @return the transport choose (method.transport)
-     */
-    @Nullable public WebAuthnDto getWebauthnCredentialRequestOptions() {
-        return webauthnCredentialRequestOptions;
-    }
-
-    /**
-     * Set the webauthn values.
-     *
-     * @param webauthndto the webauthn dto.
-     */
-    public void setWebauthnCredentialRequestOptions(@Nullable final WebAuthnDto webauthndto) {
-        webauthnCredentialRequestOptions = webauthndto;
-
-    }
-
-    /**
-     * Get the transport choose.
-     *
-     * @return the transport choose (method.transport)
-     */
-    @Nullable public String getTransportChoose() {
-        return transportChoose;
-    }
-
-    /**
-     * Set the transport choose.
-     *
-     * @param methodAndTransport the transport choose (method.transport)
-     *
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setTransportChoose(@Nullable final String methodAndTransport) {
-        transportChoose = methodAndTransport;
-
-        return this;
-    }
-
-    /**
-     * Get counter of sent.
-     *
-     * @return the sendCounter.
-     */
-    @Nonnull public int getSendCounter() {
-        return sendCounter;
-    }
-
-    /**
-     * Set the counter of sent.
-     *
-     * @param counter the counter of send message done.
-     *
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setSendCounter(@Nonnull final int counter) {
-        sendCounter = counter;
-
-        return this;
-    }
-
-    /**
-     * Get the token code.
-     *
-     * @return the token code
-     */
-    @Nullable public Integer getTokenCode() {
-        return tokenCode;
-    }
-
-    /**
-     * Set the token code.
-     *
-     * @param code the token code
-     *
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setTokenCode(@Nullable final Integer code) {
-        tokenCode = code;
-
-        return this;
-    }
-
-    /**
-     * Set the webauthn pub key credential
-     *
-     * @param pkCredAssertion the webauthn pub key credential
-     * @return this context
-     */
-    @Nonnull public EsupOtpContext setPublicKeyCredentialAssertionResponse(@Nullable final WebAuthnPublicKeyCredential pkCredAssertion) {
-        this.publicKeyCredentialAssertionResponse = pkCredAssertion;
-
-        return this;
-    }
-
-    /**
-     * Get the webauthn pub key credential
-     *
-     * @return the webauthn pub key credential
-     */
-    @Nullable public WebAuthnPublicKeyCredential getPublicKeyCredentialAssertionResponse() {
-        return publicKeyCredentialAssertionResponse;
-    }
 }

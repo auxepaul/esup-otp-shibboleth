@@ -28,33 +28,39 @@ public interface WebauthnMapper {
     WebAuthnDto toWebAuthnDto(EsupOtpWebauthnResponse webauthnResponse);
 
     /**
-     * Serialize {@link WebAuthnPublicKeyCredential} object to {@link EsupOtpVerifyWebAuthnRequest}
+     * Serialize {@link WebAuthnPublicKeyCredential} object to
+     * {@link EsupOtpVerifyWebAuthnRequest}
      *
-     * note: credID is contained in response, as response.id
-     * note: response.id and response.rawId are the same when sending because rawId is an arraybuffer, and toWebAuthnResponseDto converts it to a string, causing to equal id.
-     * note => 3x the same id is sent, redundant
+     * note: credID is contained in response, as response.id note: response.id and
+     * response.rawId are the same when sending because rawId is an arraybuffer, and
+     * toWebAuthnResponseDto converts it to a string, causing to equal id. note =>
+     * 3x the same id is sent, redundant
      *
      * @param webAuthnPublicKeyCredential
      * @return
      */
     @Mapping(target = "credId", source = "id")
     @Mapping(target = "response", expression = "java(toWebAuthnResponseDto(webAuthnPublicKeyCredential))")
-    EsupOtpVerifyWebAuthnRequest toEsupOtpVerifyWebAuthnRequestDto(WebAuthnPublicKeyCredential webAuthnPublicKeyCredential);
+    EsupOtpVerifyWebAuthnRequest toEsupOtpVerifyWebAuthnRequestDto(
+            WebAuthnPublicKeyCredential webAuthnPublicKeyCredential);
 
     @Mapping(target = "rawId", expression = "java(bufferToBase64URLString(webAuthnPublicKeyCredential.getRawId()))")
     @Mapping(target = "authenticatorAttachment", expression = "java(toAuthenticatorAttachment(webAuthnPublicKeyCredential.getAuthenticatorAttachment()))")
-    EsupOtpVerifyWebAuthnRequest.WebAuthnResponse toWebAuthnResponseDto(WebAuthnPublicKeyCredential webAuthnPublicKeyCredential);
+    EsupOtpVerifyWebAuthnRequest.WebAuthnResponse toWebAuthnResponseDto(
+            WebAuthnPublicKeyCredential webAuthnPublicKeyCredential);
 
     @Mapping(target = "authenticatorData", expression = "java(bufferToBase64URLString(webAuthnAuthenticatorAssertionResponse.getAuthenticatorData()))")
     @Mapping(target = "clientDataJson", expression = "java(bufferToBase64URLString(webAuthnAuthenticatorAssertionResponse.getClientDataJson()))")
     @Mapping(target = "signature", expression = "java(bufferToBase64URLString(webAuthnAuthenticatorAssertionResponse.getSignature()))")
     @Mapping(target = "userHandle", expression = "java(bufferToBase64URLString(webAuthnAuthenticatorAssertionResponse.getUserHandle()))")
-    EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.ResponseData toWebAuthnResponseDataDto(WebAuthnPublicKeyCredential.WebAuthnAuthenticatorAssertionResponse webAuthnAuthenticatorAssertionResponse);
+    EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.ResponseData toWebAuthnResponseDataDto(
+            WebAuthnPublicKeyCredential.WebAuthnAuthenticatorAssertionResponse webAuthnAuthenticatorAssertionResponse);
 
     /**
      * Get byte array to Base64 String.
      * 
-     * @param buffer byte array.
+     * @param buffer
+     *            byte array.
      * @return base64.
      */
     default String bufferToBase64URLString(byte[] buffer) {
@@ -66,8 +72,7 @@ public interface WebauthnMapper {
         String base64String = Base64.getEncoder().encodeToString(buffer);
 
         // Convertir Base64 en Base64URL
-        return base64String
-                .replace('+', '-') // Remplace '+' par '-'
+        return base64String.replace('+', '-') // Remplace '+' par '-'
                 .replace('/', '_') // Remplace '/' par '_'
                 .replace("=", ""); // Supprime les '=' de padding
 
@@ -81,8 +86,7 @@ public interface WebauthnMapper {
      */
     default byte[] base64URLStringToBuffer(String value) {
         // Convertir Base64URL en Base64
-        String base64 = value
-                .replace('-', '+') // Convertir '-' en '+'
+        String base64 = value.replace('-', '+') // Convertir '-' en '+'
                 .replace('_', '/'); // Convertir '_' en '/'
 
         // Ajouter le padding nécessaire pour obtenir une longueur multiple de 4
@@ -97,7 +101,8 @@ public interface WebauthnMapper {
 
     default List<WebAuthnDto.AllowCredentialDto> transformAuths(List<EsupOtpWebauthnResponse.EsupOtpAuth> auths) {
         return auths.stream()
-                .map(auth -> new WebAuthnDto.AllowCredentialDto(base64URLStringToBuffer(auth.getCredentialId()), "public-key"))
+                .map(auth -> new WebAuthnDto.AllowCredentialDto(base64URLStringToBuffer(auth.getCredentialId()),
+                        "public-key"))
                 .toList();
     }
 
@@ -105,7 +110,8 @@ public interface WebauthnMapper {
         return 3 * 60000;
     }
 
-    default EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment toAuthenticatorAttachment(String value) {
+    default EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment toAuthenticatorAttachment(
+            String value) {
         return EsupOtpVerifyWebAuthnRequest.WebAuthnResponse.AuthenticatorAttachment.fromString(value);
     }
 }

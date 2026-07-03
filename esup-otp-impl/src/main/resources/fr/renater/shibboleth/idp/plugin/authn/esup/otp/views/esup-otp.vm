@@ -1,5 +1,5 @@
 ##
-## Velocity Template for DisplayTOTPView view-state
+## Velocity Template for DisplayEsupOtpView view-state
 ##
 ## Velocity context will contain the following properties
 ## flowExecutionUrl - the form action location
@@ -10,19 +10,28 @@
 ## authenticationErrorContext - context with login error state
 ## authenticationWarningContext - context with login warning state
 ## rpUIContext - the context with SP UI information from the metadata
-## encoder - HTMLEncoder class
+## esupOtpEncoder - EsupOtpEncoder class
 ## cspDigester - Calculates base64-encoded SHA-2 hashes (call apply)
 ## cspNonce - Calculates secure nonces (call generateIdentifier)
+## encoder - HTMLEncoder class
 ## request - HttpServletRequest
 ## response - HttpServletResponse
 ## environment - Spring Environment object for property resolution
 ## custom - arbitrary object injected by deployer
 ##
-#set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
 #set ($rpContext = $profileRequestContext.getSubcontext('net.shibboleth.profile.context.RelyingPartyContext'))
 ##
-#set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.esup.otp.sending', 'Sending in, please wait...')'")
-$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onClick)'")
+#set ($esupOtpContext = $authenticationContext.getSubcontext('fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext'))
+#set ($managerLink = $environment.getProperty("idp.esup.otp.manager.link"))
+##
+#set ($nonce = $cspNonce.generateIdentifier())
+#if ($esupOtpContext.getEnabledChoices().isEmpty())
+  #set ($onLoad = "alert(#springMessageText('idp.esup.otp.nochoices', 'You have no registered authentication method.'))")
+#else
+  #set ($onLoad = "document.getElementById('methodChoices').focus()")
+#end
+  #set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.esup.otp.sending', 'Sending in progress, please wait...')'")
+  $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onLoad)' 'sha256-$cspDigester.apply($onClick)' 'nonce-$nonce'")
 <!DOCTYPE html>
 <html>
     <head>
@@ -31,10 +40,10 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
         <link rel="stylesheet" type="text/css" href="$request.getContextPath()#springMessageText("idp.css", "/css/placeholder.css")">
-        <script>
+        <script #if ($nonce)nonce="$nonce"#end>
             // Fonction de vérification de la sélection
             function checkSelection() {
-                const selectElement = document.getElementById("transportchoose");
+                const selectElement = document.getElementById("methodChoices");
                 const submitButton = document.getElementById("submitButton");
 
                 // Active ou désactive le bouton en fonction de la sélection
@@ -43,24 +52,24 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 
             // Ajoute l'écouteur d'événement une fois le contenu chargé
             document.addEventListener("DOMContentLoaded", function() {
-                const selectElement = document.getElementById("transportchoose");
+                const selectElement = document.getElementById("methodChoices");
                 selectElement.addEventListener("change", checkSelection);
             });
         </script>
     </head>
-    <body>
-        <main class="grid-container">
+    <body onLoad="$onLoad">
+        <main class="main">
             <header>
                 <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/placeholder-logo.png")" alt="#springMessageText("idp.logo.alt-text", "logo")" />
 
                 #set ($serviceName = $rpUIContext.serviceName)
                 #if ($serviceName && !$rpContext.getRelyingPartyId().contains($serviceName))
-                    <h1>#springMessageText("idp.esup.otp.title", "Multi-Factor Authentication")</h1>
+                    <h1>#springMessageText("idp.login.loginTo", "Login to") $encoder.encodeForHTML($serviceName)</h1>
                 #end
             </header>
 
             <section>
-                <form action="$flowExecutionUrl" method="post">
+                <form id="fm1" action="$flowExecutionUrl" method="post">
                     #parse("csrf/csrf.vm")
 
                     #*
@@ -86,19 +95,19 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     #parse("esup-otp-error.vm")
 
                     #if ($esupOtpContext.getEnabledChoices().isEmpty())
-                        <article class="small-10 medium-10 large-7 text-center">
-                            <p class="callout warning">
-                                #springMessageText("idp.esup.otp.nochoices", "No choice configured.")
+                       <article>
+                            <p class="output-message output--warning">
+                                #springMessageText("idp.esup.otp.nochoices", "You have no registered authentication method.")
                                 <br/><br/>
-                                #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a>
+                                #springMessageText("idp.esup.otp.nochoices.activate","To access this service, activate the multi-factor authentication ") <a href='${managerLink}' target='_blank'>#springMessageText("idp.esup.otp.nochoices.here","here")</a>.
                             </p>
                         </article>
                     #else
-                        <fieldset class="small-10 medium-10 large-7 margin-top">
+                        <fieldset>
 
-                            <label for="transportchoose"><i class="fa fa-lg fa-rocket"></i> #springMessageText("idp.esup.otp.choices", "Generate token with below method")</label>
-                            <select class="form-element" id="transportchoose" name="transportchoose" required>
-                                <option value="" disabled selected>Selectionnez une option disponible</option>
+                            <label for="methodChoices">#springMessageText("idp.esup.otp.methodchoices", "Choose an authentication method:")</label>
+                            <select class="form-element" id="methodChoices" name="methodchoice" required>
+                                <option value="" disabled selected>#springMessageText("idp.esup.otp.methodchoices.option", "Please select an authentication method")</option>
                                 #foreach($option in $esupOtpContext.getEnabledChoices())
                                     <option value="$option">
                                     #set ($dotIndex = $option.lastIndexOf("."))
@@ -112,29 +121,15 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                                 #end
                             </select>
 
-                            <button class="button float-right" type="submit" name="_eventId_proceed" id="submitButton"
-                                disabled
-                                onClick="$onClick"
-                                >#springMessageText("idp.esup.otp.send", "Send")</button>
+                            <button type="submit" name="_eventId_proceed" id="submitButton" disabled onClick="$onClick">#springMessageText("idp.esup.otp.send", "Send")</button>
                         </fieldset>
-
-                        <article class="small-10 medium-10 large-7 text-center">
-                            <p class="callout primary">
-                                #springMessageText("idp.esup.otp.updatechoices", "Update choices.")
-                                <br/><br/>
-                                #springMessageText("idp.esup.otp.manager", "Go to application") : <a href="#springMessageText("idp.esup.otp.manager.link", "https://otpmanager-test.fr/preferences")" target="_blank">#springMessageText("idp.esup.otp.manager.here", "here")</a>
-                            </p>
-                        </article>
                     #end
                 </form>
-
-
                 <ul>
                     <li><a href="${managerLink}">#springMessageText("idp.esup.otp.updatechoices", "Update your authentication choices?")</a></li>
                     <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>
                     <li><a href="#springMessageText("idp.url.helpdesk", '#')">#springMessageText("idp.login.needHelp", "Need Help?")</a></li>
                 </ul>
-
             </section>
         </main>
         <footer class="footer">

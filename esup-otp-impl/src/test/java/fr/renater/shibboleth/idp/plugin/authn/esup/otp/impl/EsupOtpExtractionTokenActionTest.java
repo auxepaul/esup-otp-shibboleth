@@ -22,16 +22,16 @@ import net.shibboleth.shared.testing.ConstantSupplier;
  *
  */
 public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextTest {
-    
+
     private EsupOtpExtractionTokenAction action;
 
-    
-    @BeforeMethod public void setUp() throws ComponentInitializationException {
+    @BeforeMethod
+    public void setUp() throws ComponentInitializationException {
         super.setUp();
-        
+
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
-        eoc.setTransportChoose(PUSH_METHOD);
+        eoc.setMethodChoice(PUSH_METHOD);
         final MockHttpServletRequest request = new MockHttpServletRequest();
         action.setHttpServletRequestSupplier(new ConstantSupplier<>(request));
         action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
@@ -45,10 +45,11 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         action.initialize();
     }
 
-    @Test public void testNoServlet() throws Exception {
+    @Test
+    public void testNoServlet() throws Exception {
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
-        eoc.setTransportChoose(PUSH_METHOD);
+        eoc.setMethodChoice(PUSH_METHOD);
         action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
 
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();
@@ -63,7 +64,8 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testNoUsername() throws Exception {
+    @Test
+    public void testNoUsername() throws Exception {
         action = new EsupOtpExtractionTokenAction();
         addEsupOtpContext();
         eoc.setUsername(null);
@@ -81,12 +83,14 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testMissingField() throws Exception {
+    @Test
+    public void testMissingField() throws Exception {
         final Event event = action.execute(src);
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testWrongField() throws Exception {
+    @Test
+    public void testWrongField() throws Exception {
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
             mock.addParameter("Bar", "123456");
         }
@@ -95,7 +99,8 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testInvalidFormat() throws Exception {
+    @Test
+    public void testInvalidFormat() throws Exception {
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
             mock.addParameter("token", "A123456");
         }
@@ -104,8 +109,9 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         ActionTestingSupport.assertEvent(event, AuthnEventIds.INVALID_CREDENTIALS);
     }
 
-    @Test public void testValid() throws Exception {
-        eoc.setTransportChoose(PUSH_METHOD);
+    @Test
+    public void testValid() throws Exception {
+        eoc.setMethodChoice(PUSH_METHOD);
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
             mock.addParameter("token", "123456");
         }
@@ -119,10 +125,12 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         Assert.assertEquals(esupOtpCtx.getTokenCode(), Integer.valueOf(123456));
     }
 
-    @Test public void testValidWebauthn() throws Exception {
-        eoc.setTransportChoose(WEBAUTHN_METHOD);
+    @Test
+    public void testValidWebauthn() throws Exception {
+        eoc.setMethodChoice(WEBAUTHN_METHOD);
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
-            mock.addParameter("publicKeyCredential", "{\"id\":\"9_EzXuJQy79lJArC9J-oXoD_1biPFMBMhnbyegSRrsg\",\"response\":{\"authenticatorData\":\"S7wmxUIOh13coAzoaY4w9wC3y0Bm_MgckM-PKf_tIikFAAAAAQ\",\"signature\":\"MEQCIEGhq_MogJ9PvY6Vg_WcHgKlQ8YLsJPGhJ-m62D-7yCgAiARzjsMeXkjI5zssglPTh5U2JH28JGihtHNJrBfEktkqA\",\"userHandle\":\"dGhpc2lzYWNoYWxsZW5nZQ\",\"clientDataJSON\":\"eyJvcmlnaW4iOiJodHRwczovL2lkcC5leGFtcGxlLmNvbSIsImNoYWxsZW5nZSI6ImRHaHBjMmx6QmFOb1lXeHNaVzVuWlE9PSIsInR5cGUiOiJ3ZWJhdXRobi5nZXQifQ\"},\"clientExtensionResults\":{\"extensionIds\":[]},\"type\":\"public-key\",\"rawId\":\"9_EzXuJQy79lJArC9J-oXoD_1biPFMBMhnbyegSRrsg\"}");
+            mock.addParameter("publicKeyCredential",
+                    "{\"id\":\"9_EzXuJQy79lJArC9J-oXoD_1biPFMBMhnbyegSRrsg\",\"response\":{\"authenticatorData\":\"S7wmxUIOh13coAzoaY4w9wC3y0Bm_MgckM-PKf_tIikFAAAAAQ\",\"signature\":\"MEQCIEGhq_MogJ9PvY6Vg_WcHgKlQ8YLsJPGhJ-m62D-7yCgAiARzjsMeXkjI5zssglPTh5U2JH28JGihtHNJrBfEktkqA\",\"userHandle\":\"dGhpc2lzYWNoYWxsZW5nZQ\",\"clientDataJSON\":\"eyJvcmlnaW4iOiJodHRwczovL2lkcC5leGFtcGxlLmNvbSIsImNoYWxsZW5nZSI6ImRHaHBjMmx6QmFOb1lXeHNaVzVuWlE9PSIsInR5cGUiOiJ3ZWJhdXRobi5nZXQifQ\"},\"clientExtensionResults\":{\"extensionIds\":[]},\"type\":\"public-key\",\"rawId\":\"9_EzXuJQy79lJArC9J-oXoD_1biPFMBMhnbyegSRrsg\"}");
         }
 
         final Event event = action.execute(src);

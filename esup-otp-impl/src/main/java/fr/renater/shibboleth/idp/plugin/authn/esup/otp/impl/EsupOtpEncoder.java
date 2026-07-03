@@ -1,5 +1,15 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Calendar;
+import java.util.TimeZone;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import javax.annotation.concurrent.ThreadSafe;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.Base64Variants;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -7,39 +17,31 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnDto;
+import lombok.CustomLog;
+import lombok.NoArgsConstructor;
 import net.shibboleth.shared.annotation.ParameterName;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
 import net.shibboleth.shared.primitive.StringSupport;
-import net.shibboleth.shared.primitive.LoggerFactory;
-import org.slf4j.Logger;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.annotation.concurrent.ThreadSafe;
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 /**
  * An Custom encoder for esup otp plugin.
  */
+@NoArgsConstructor
 @ThreadSafe
+@CustomLog
 public final class EsupOtpEncoder {
 
-    /** Class logger. */
-    @Nonnull
-    private static final Logger log = LoggerFactory.getLogger(EsupOtpEncoder.class);
+    @NotEmpty
+    private String usersSecret;
 
-    @NotEmpty private String usersSecret;
-
-    public EsupOtpEncoder() {
-    }
-
-    /** Constructor */
-    public EsupOtpEncoder(@Nonnull @NotEmpty @ParameterName(name="usersSecret") String secret) {
+    /**
+     * Constructor
+     * 
+     * @param secret
+     */
+    public EsupOtpEncoder(@Nonnull @NotEmpty @ParameterName(name = "usersSecret") String secret) {
         this.usersSecret = StringSupport.trimOrNull(secret);
     }
 
@@ -60,13 +62,13 @@ public final class EsupOtpEncoder {
     /**
      * Serialize the PublicKeyCredentialRequestOptions request into a JSON string.
      *
-     * @param options the options to serialize
+     * @param options
+     *            the options to serialize
      *
-     * @return the JSON serialized PublicKeyCredentialRequestOptions, or an empty string if there is an error
-     *          converting the string.
+     * @return the JSON serialized PublicKeyCredentialRequestOptions, or an empty
+     *         string if there is an error converting the string.
      */
-    public static String serializePublicKeyCredentialRequestOptionsAsJSON(
-            @Nullable final WebAuthnDto options) {
+    public static String serializePublicKeyCredentialRequestOptionsAsJSON(@Nullable final WebAuthnDto options) {
         log.debug("Get options : {}", options);
         if (options != null) {
             try {
@@ -83,6 +85,7 @@ public final class EsupOtpEncoder {
 
     /**
      * Compute user hash for request need it.
+     * 
      * @param uid
      * @return user hash
      * @throws NoSuchAlgorithmException
@@ -105,6 +108,7 @@ public final class EsupOtpEncoder {
 
     /**
      * Convert bytes array to hexadecimal string.
+     * 
      * @param bytes
      * @return hexadecimal string.
      */
@@ -122,6 +126,7 @@ public final class EsupOtpEncoder {
 
     /**
      * Get salt for uid.
+     * 
      * @param uid
      * @return salt.
      */

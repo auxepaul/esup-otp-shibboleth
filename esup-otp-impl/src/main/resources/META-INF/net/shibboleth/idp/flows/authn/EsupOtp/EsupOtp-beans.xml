@@ -1,117 +1,135 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:c="http://www.springframework.org/schema/c"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
-                           
-       default-init-method="initialize"
-       default-destroy-method="destroy">
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd 
+                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize"
+    default-destroy-method="destroy">
 
-    <bean id ="ExtendedMessageSourceResources" parent="shibboleth.ListCombiner"
-          p:firstList-ref="#{'%{idp.message.resources:shibboleth.MessageSourceResources}'.trim()}" >
+    <bean id="ExtendedMessageSourceResources" parent="shibboleth.ListCombiner"
+        p:firstList-ref="#{'%{idp.message.resources:shibboleth.MessageSourceResources}'.trim()}">
         <property name="secondList">
-            <util:list >
-                <value>classpath:/fr/renater/shibboleth/idp/plugin/authn/esup/otp/messages</value>
+            <util:list>
+                <value>
+                    classpath:/fr/renater/shibboleth/idp/plugin/authn/esup/otp/messages</value>
             </util:list>
         </property>
     </bean>
 
-    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
+    <bean id="messageSource"
+        class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
         p:cacheSeconds="%{idp.message.cacheSeconds:300}"
         p:basenames-ref="ExtendedMessageSourceResources"
         p:defaultEncoding="UTF-8" />
 
     <!-- Default username comes from previous c14n or session. -->
     <bean id="DefaultUsernameLookupStrategy" lazy-init="true" scope="singleton"
-          class="net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy" />
+        class="net.shibboleth.idp.session.context.navigate.CanonicalUsernameLookupStrategy" />
 
-    <bean id="SubjectContextUsernameLookupStrategy" lazy-init="true" scope="singleton"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.navigate.UsernameLookupFromSubjectContext" />
+    <bean id="SubjectContextUsernameLookupStrategy" lazy-init="true"
+        scope="singleton"
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.navigate.UsernameLookupFromSubjectContext" />
 
-    <bean id="AttributeContextUsernameLookupStrategy" lazy-init="true" scope="singleton"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.navigate.AttributeContextStringLookupStrategy"
-          p:principalNameLookupStrategy-ref="DefaultUsernameLookupStrategy"
-          p:attributeResolverService-ref="shibboleth.AttributeResolverService"
-          p:attributeId="%{idp.esup.otp.attributeId:#{null}}"/>
+    <bean id="AttributeContextUsernameLookupStrategy" lazy-init="true"
+        scope="singleton"
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.navigate.AttributeContextStringLookupStrategy"
+        p:principalNameLookupStrategy-ref="DefaultUsernameLookupStrategy"
+        p:attributeResolverService-ref="shibboleth.AttributeResolverService"
+        p:attributeId="%{idp.esup.otp.attributeId:#{null}}" />
 
     <bean id="EsupOtpClientRegistry" scope="singleton"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry" />
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpClientRegistry" />
 
     <bean id="EsupOtpGetUserInfo"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpGetUserInfo" scope="prototype"
-          p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
-          p:usernameLookupStrategy="#{getObject('%{idp.esup.otp.username.strategy:DefaultUsernameLookupStrategy}')}"
-          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
-          p:clientRegistry-ref="EsupOtpClientRegistry" />
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpGetUserInfo"
+        scope="prototype"
+        p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
+        p:usernameLookupStrategy="#{getObject('%{idp.esup.otp.username.strategy:DefaultUsernameLookupStrategy}')}"
+        p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
+        p:clientRegistry-ref="EsupOtpClientRegistry" />
 
     <bean id="EsupOtpExtractionAction"
-          class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction" scope="prototype"
-          p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
-          p:usernameLookupStrategy="#{getObject('%{idp.esup.otp.username.strategy:DefaultUsernameLookupStrategy}')}"
-          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
-          p:clientRegistry-ref="EsupOtpClientRegistry" />
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionAction"
+        scope="prototype"
+        p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
+        p:usernameLookupStrategy="#{getObject('%{idp.esup.otp.username.strategy:DefaultUsernameLookupStrategy}')}"
+        p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
+        p:clientRegistry-ref="EsupOtpClientRegistry" />
 
-    <bean id="EsupOtpExtractionTokenAction" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction" scope="prototype"
-          p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
-          p:usernameLookupStrategy="#{getObject('%{idp.esup.otp.username.strategy:DefaultUsernameLookupStrategy}')}"
-          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy" />
-            
-    <bean id="ValidateEsupOtpCredentials" class="net.shibboleth.idp.authn.impl.ValidateCredentials" scope="prototype"
+    <bean id="EsupOtpExtractionTokenAction"
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpExtractionTokenAction"
+        scope="prototype"
+        p:httpServletRequestSupplier-ref="shibboleth.HttpServletRequestSupplier"
+        p:usernameLookupStrategy="#{getObject('%{idp.esup.otp.username.strategy:DefaultUsernameLookupStrategy}')}"
+        p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy" />
+
+    <bean id="ValidateEsupOtpCredentials"
+        class="net.shibboleth.idp.authn.impl.ValidateCredentials"
+        scope="prototype"
         p:validators-ref="EsupOtpValidator"
         p:resultCachingPredicate="#{getObject('shibboleth.authn.TOTP.resultCachingPredicate')}"
         p:addDefaultPrincipals="%{idp.authn.TOTP.addDefaultPrincipals:true}"
         p:classifiedMessages="#{getObject('shibboleth.authn.TOTP.ClassifiedMessageMap')}"
         p:lockoutManager="#{getObject('shibboleth.authn.TOTP.AccountLockoutManager')}" />
-    
+
     <!-- These are singletons acting as default "back-ends". -->
 
-    <bean id="EsupOtpValidator" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator" lazy-init="true"
-          p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
-          p:clientRegistry-ref="EsupOtpClientRegistry" />
+    <bean id="EsupOtpValidator"
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpCredentialValidator"
+        lazy-init="true"
+        p:esupOtpIntegrationLookupStrategy-ref="EsupOtpIntegrationStrategy"
+        p:clientRegistry-ref="EsupOtpClientRegistry" />
 
-    <!-- Used in views to calculate CSP hashes and nonces, remove and adjust beans in flow when compatibility bumped past 5.0 -->
-    
-    <bean id="TOTPCSPDigester" class="net.shibboleth.shared.codec.StringDigester"
+    <!-- Used in views to calculate CSP hashes and nonces, remove and adjust
+    beans in flow when compatibility bumped past 5.0 -->
+
+    <bean id="EsupOTPCSPDigester"
+        class="net.shibboleth.shared.codec.StringDigester"
         c:algorithm="SHA256" c:format="BASE64" />
 
-    <bean id="TOTPCSPNonce" destroy-method=""
-            class="net.shibboleth.shared.security.IdentifierGenerationStrategy" factory-method="getInstance">
+    <bean id="EsupOTPCSPNonce" destroy-method=""
+        class="net.shibboleth.shared.security.IdentifierGenerationStrategy"
+        factory-method="getInstance">
         <constructor-arg>
             <util:constant
                 static-field="net.shibboleth.shared.security.IdentifierGenerationStrategy.ProviderType.SECURE" />
         </constructor-arg>
         <constructor-arg>
-            <bean class="net.shibboleth.shared.security.RandomIdentifierParameterSpec"
-                    c:identifierSize="16">
+            <bean
+                class="net.shibboleth.shared.security.RandomIdentifierParameterSpec"
+                c:identifierSize="16">
                 <constructor-arg name="source">
-                    <null/>
+                    <null />
                 </constructor-arg>
                 <constructor-arg name="identifierEncoder">
-                    <null/>
+                    <null />
                 </constructor-arg>
             </bean>
         </constructor-arg>
     </bean>
 
-    <bean id="EsupOTPEncoder" class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder" lazy-init="true"
-          p:usersSecret="%{idp.esup.otp.usersSecret}" />
+    <bean id="EsupOTPEncoder"
+        class="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder"
+        lazy-init="true"
+        p:usersSecret="%{idp.esup.otp.usersSecret}" />
 
     <!-- Esup Otp Integration -->
-    <bean id="DefaultEsupOtpIntegration" class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration" lazy-init="true"
-          p:APIHost="%{idp.esup.otp.apiHost}"
-          p:usersSecret="%{idp.esup.otp.usersSecret}"
-          p:apiPassword="%{idp.esup.otp.apiPassword}"
-          p:issuer="%{idp.esup.otp.issuer}"
-          p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
-          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:}"
-          p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,passcode_grid,random_code,random_code_mail}"
-          p:maxRetry="%{idp.esup.otp.send.counter:3}" />
+    <bean id="DefaultEsupOtpIntegration"
+        class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
+        lazy-init="true"
+        p:APIHost="%{idp.esup.otp.apiHost}"
+        p:usersSecret="%{idp.esup.otp.usersSecret}"
+        p:apiPassword="%{idp.esup.otp.apiPassword}"
+        p:issuer="%{idp.esup.otp.issuer}"
+        p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,passcode_grid,random_code,random_code_mail}"
+        p:codeLength="%{idp.esup.otp.codeLength:6}"
+        p:maxRetry="%{idp.esup.otp.send.counter:3}" />
     <bean id="EsupOtpIntegrationStrategy" parent="shibboleth.Functions.Constant"
-          c:target-ref="DefaultEsupOtpIntegration" />
+        c:target-ref="DefaultEsupOtpIntegration" />
 
 </beans>

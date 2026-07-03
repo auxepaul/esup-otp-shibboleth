@@ -1,16 +1,24 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto;
 
-import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
-import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
-import lombok.Data;
-
 import java.util.List;
 
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
+import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 /**
- * Webauthn Dto to transform {@link EsupOtpWebauthnResponse} from the API
- * to store into esup otp context {@link EsupOtpContext}.
+ * Webauthn Dto to transform {@link EsupOtpWebauthnResponse} from the API to
+ * store into esup otp context {@link EsupOtpContext}.
  */
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class WebAuthnDto {
 
     private byte[] challenge;
@@ -27,7 +35,11 @@ public class WebAuthnDto {
 
     private List<AllowCredentialDto> allowCredentials;
 
-    @Data
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     public static class Rp {
 
         private String name;
@@ -35,7 +47,11 @@ public class WebAuthnDto {
         private String id;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     public static class PubKeyCredParamsDto {
 
         private String type;
@@ -43,7 +59,11 @@ public class WebAuthnDto {
         private double alg;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     public static class AllowCredentialDto {
 
         private byte[] id;

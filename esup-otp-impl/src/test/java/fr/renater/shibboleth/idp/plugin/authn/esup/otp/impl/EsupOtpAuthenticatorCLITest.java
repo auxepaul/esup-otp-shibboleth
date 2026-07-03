@@ -6,7 +6,6 @@ import org.testng.annotations.Test;
 
 public class EsupOtpAuthenticatorCLITest {
 
-
     private EsupOtpAuthenticatorCLI cli;
 
     @BeforeMethod
@@ -22,8 +21,7 @@ public class EsupOtpAuthenticatorCLITest {
         arguments.printHelp(System.out);
     }
 
-    /*@Test
-    public void getUserUids() {
-        cli.get
-    }*/
+    /*
+     * @Test public void getUserUids() { cli.get }
+     */
 }

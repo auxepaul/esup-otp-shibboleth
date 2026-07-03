@@ -117,6 +117,19 @@ public class UserMethods {
         @JsonProperty("used_code")
         private int usedCode;
 
+        /**
+         * Grid of codes with passcode_grid method. Not returned with get user infos
+         * endpoint.
+         */
+        private String[][] grid;
+
+        /** Line and column of the challenge with passcode_grid method. */
+        private int[] challenge;
+
+        /** with passcode_grid method. */
+        @JsonProperty("generation_date")
+        private Long generationDate;
+
         /** Device dto set only for push method. */
         private Device device;
 

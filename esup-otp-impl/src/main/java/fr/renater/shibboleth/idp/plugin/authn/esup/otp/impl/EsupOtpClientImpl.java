@@ -1,14 +1,12 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.PASSCODE_GRID_METHOD;
+
 import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 import javax.annotation.Nonnull;
 
-import org.slf4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -24,33 +22,30 @@ import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnRequest;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpVerifyWebAuthnResponse;
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpPasscodeGridResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpWebauthnResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl.EsupOtpEncoder;
-import net.shibboleth.shared.primitive.LoggerFactory;
+import lombok.CustomLog;
 
 /**
  * Esup otp api connector implementation.
  */
+@SuppressWarnings("unused")
+@CustomLog
 public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupOtpClient {
-
-    /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpClientImpl.class);
-
-    /** Esup otp integration configuration. */
-    private final DefaultEsupOtpIntegration esupOtpIntegration;
 
     private final EsupOtpEncoder encoder;
 
     /**
      * Constructor.
      *
-     * @param integration DefaultEsupOtpIntegration.
+     * @param integration
+     *            DefaultEsupOtpIntegration.
      */
     public EsupOtpClientImpl(final DefaultEsupOtpIntegration integration) {
         super(new EsupOtpRestTemplate(integration));
 
-        this.esupOtpIntegration = integration;
         this.encoder = new EsupOtpEncoder(integration.getUsersSecret());
     }
 
@@ -58,20 +53,44 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public EsupOtpUserInfoResponse getOtpUserInfos(final String uid) throws EsupOtpClientException {
         try {
             final String hash = encoder.getUserHash(uid);
-            return get(EsupOtpUriConstants.Public.GET_USER_INFOS, EsupOtpUserInfoResponse.class, uid, hash);
+            final EsupOtpUserInfoResponse response = get(EsupOtpUriConstants.Public.GET_USER_INFOS,
+                    EsupOtpUserInfoResponse.class, uid, hash);
+
+            log.debug("getOtpUserInfos method");
+
+            return response;
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         }
-
     }
 
     /** {@inheritDoc} */
-    public EsupOtpResponse postSendMessage(final String uid, final String method,
-                                                  final String transport) throws EsupOtpClientException {
+    public EsupOtpResponse postSendMessage(final String uid, final String method, final String transport)
+            throws EsupOtpClientException {
         try {
             final String hash = encoder.getUserHash(uid);
-            return post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpResponse.class,
-                    true, uid, method, transport, hash);
+            final EsupOtpResponse response = post(EsupOtpUriConstants.Public.POST_MESSAGE, EsupOtpResponse.class, true,
+                    uid, method, transport, hash);
+
+            log.debug("postSendMessage method");
+
+            return response;
+        } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
+            throw new EsupOtpClientException("Get user hash failed", e);
+        }
+    }
+
+    @Override
+    public EsupOtpPasscodeGridResponse postGeneratePasscodeGridChallenge(final String uid)
+            throws EsupOtpClientException {
+        try {
+            final String hash = encoder.getUserHash(uid);
+            final EsupOtpPasscodeGridResponse response = post(EsupOtpUriConstants.Public.POST_MESSAGE,
+                    EsupOtpPasscodeGridResponse.class, true, uid, PASSCODE_GRID_METHOD, PASSCODE_GRID_METHOD, hash);
+
+            log.debug("postGeneratePassCodeGridChallenge method");
+
+            return response;
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         }
@@ -81,8 +100,8 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     public EsupOtpWebauthnResponse postGenerateWebauthnSecret(final String uid) throws EsupOtpClientException {
         try {
             final String hash = encoder.getUserHash(uid);
-            return post(EsupOtpUriConstants.Public.POST_GENERATE_WEBAUTHN, EsupOtpWebauthnResponse.class,
-                    true, uid, hash);
+            return post(EsupOtpUriConstants.Public.POST_GENERATE_WEBAUTHN, EsupOtpWebauthnResponse.class, true, uid,
+                    hash);
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         }
@@ -90,7 +109,12 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
 
     /** {@inheritDoc} */
     public EsupOtpUserInfoResponse getUserInfos(final String uid) throws EsupOtpClientException {
-        return get(EsupOtpUriConstants.Protected.GET_USER_INFOS, EsupOtpUserInfoResponse.class, uid);
+        final EsupOtpUserInfoResponse response = get(EsupOtpUriConstants.Protected.GET_USER_INFOS,
+                EsupOtpUserInfoResponse.class, uid);
+
+        log.debug("getUserInfos method");
+
+        return response;
     }
 
     /** {@inheritDoc} */
@@ -111,8 +135,8 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     /** {@inheritDoc} */
     public EsupOtpResponse postConfirmActivate(final String uid, final String method, final String activationCode)
             throws EsupOtpClientException {
-        return post(EsupOtpUriConstants.Protected.POST_CONFIRM_ACTIVATE, EsupOtpResponse.class, 
-                true, uid, method, activationCode);
+        return post(EsupOtpUriConstants.Protected.POST_CONFIRM_ACTIVATE, EsupOtpResponse.class, true, uid, method,
+                activationCode);
     }
 
     /** {@inheritDoc} */
@@ -124,8 +148,8 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     /** {@inheritDoc} */
     public EsupOtpResponse getNewTransportTest(final String uid, final String transport, final String newTransport)
             throws EsupOtpClientException {
-        return get(EsupOtpUriConstants.Protected.GET_NEW_TRANSPORT_TEST, EsupOtpResponse.class, 
-                uid, transport, newTransport);
+        return get(EsupOtpUriConstants.Protected.GET_NEW_TRANSPORT_TEST, EsupOtpResponse.class, uid, transport,
+                newTransport);
     }
 
     /** {@inheritDoc} */
@@ -135,12 +159,12 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
 
     /** {@inheritDoc} */
     public boolean postVerify(final String uid, final String otp) throws EsupOtpClientException {
-        final EsupOtpVerifyResponse response = post(EsupOtpUriConstants.Protected.POST_VERIFY, 
+        final EsupOtpVerifyResponse response = post(EsupOtpUriConstants.Protected.POST_VERIFY,
                 EsupOtpVerifyResponse.class, false, uid, otp);
-        final boolean valid = response != null && response.getCode().equals("Ok");
-        if(!valid) {
-            log.info("Invalid token entered");
-        }
+        final boolean valid = response != null && "Ok".equals(response.getCode());
+
+        log.debug("postVerify method, valid token : {}", valid);
+
         return valid;
     }
 
@@ -151,24 +175,24 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
             final String hash = encoder.getUserHash(uid);
             final RequestEntity<?> request = RequestEntity
                     .post(EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, uid, hash)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(body);
+                    .contentType(MediaType.APPLICATION_JSON).body(body);
 
-            final ResponseEntity<EsupOtpVerifyWebAuthnResponse> response =
-                    getRestTemplate().exchange(request, EsupOtpVerifyWebAuthnResponse.class);
+            final ResponseEntity<EsupOtpVerifyWebAuthnResponse> response = getRestTemplate().exchange(request,
+                    EsupOtpVerifyWebAuthnResponse.class);
+
+            log.debug("postVerifyAuthn method");
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 return true;
             }
 
-            throw new EsupOtpClientException(
-                    "Exception occured on call : " + EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN +
-                            " with uri variables : " + uid);
+            throw new EsupOtpClientException("Exception occured on call : "
+                    + EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN + " with uri variables : " + uid);
         } catch (final NoSuchAlgorithmException | UnsupportedEncodingException e) {
             throw new EsupOtpClientException("Get user hash failed", e);
         } catch (final RestClientException e) {
-            throw new EsupOtpClientException("RestClientException occured on call: " + 
-                    EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, e);
+            throw new EsupOtpClientException(
+                    "RestClientException occured on call: " + EsupOtpUriConstants.Public.POST_VERIFY_WEBAUTHN, e);
         }
     }
 
@@ -193,7 +217,7 @@ public class EsupOtpClientImpl extends AbstractEsupOtpConnector implements EsupO
     }
 
     /** {@inheritDoc} */
-    public void putActivateMethodTransport(final String method, final String transport) throws EsupOtpClientException{
+    public void putActivateMethodTransport(final String method, final String transport) throws EsupOtpClientException {
         put(EsupOtpUriConstants.Admin.PUT_ACTIVATE_TRANSPORT, method, transport);
     }
 

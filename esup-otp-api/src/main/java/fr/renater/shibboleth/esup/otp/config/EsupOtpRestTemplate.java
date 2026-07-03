@@ -47,42 +47,37 @@ public class EsupOtpRestTemplate extends RestTemplate {
         if (CollectionUtils.isEmpty(interceptors)) {
             interceptors = new ArrayList<>();
         }
-        interceptors.add(new EsupOtpAuthInterceptor(esupOtpIntegration.getApiPassword(), esupOtpIntegration.getIssuer()));
+        interceptors
+                .add(new EsupOtpAuthInterceptor(esupOtpIntegration.getApiPassword(), esupOtpIntegration.getIssuer()));
         interceptors.add(new EsupOtpLoggingInterceptor());
         this.setInterceptors(interceptors);
         this.getMessageConverters().add(0, createMappingJacksonHttpMessageConverter());
     }
 
     private @Nonnull ClientHttpRequestFactory getClientHttpRequestFactory() {
-        final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory
-            = new HttpComponentsClientHttpRequestFactory();
+        final HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
         clientHttpRequestFactory.setHttpClient(httpClient());
         return clientHttpRequestFactory;
     }
 
     private @Nonnull CloseableHttpClient httpClient() {
         final CloseableHttpClient closeableHttpClient = HttpClientBuilder.create()
-                .setDefaultRequestConfig(requestConfig())
-                .evictExpiredConnections()
+                .setDefaultRequestConfig(requestConfig()).evictExpiredConnections()
                 .evictIdleConnections(TimeValue.of(5000, TimeUnit.MILLISECONDS))
-                .setRetryStrategy(new RetryOverHttpError())
-                .setConnectionManager(poolingHttpClientConnectionManager())
+                .setRetryStrategy(new RetryOverHttpError()).setConnectionManager(poolingHttpClientConnectionManager())
                 .build();
         assert closeableHttpClient != null;
         return closeableHttpClient;
     }
 
     private RequestConfig requestConfig() {
-        return RequestConfig.custom()
-                .setConnectionRequestTimeout(5000, TimeUnit.MILLISECONDS)
-                .build();
+        return RequestConfig.custom().setConnectionRequestTimeout(5000, TimeUnit.MILLISECONDS).build();
     }
 
     private PoolingHttpClientConnectionManager poolingHttpClientConnectionManager() {
         final PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
         final ConnectionConfig connectionConfig = ConnectionConfig.custom()
-                .setConnectTimeout(5000, TimeUnit.MILLISECONDS)
-                .build();
+                .setConnectTimeout(5000, TimeUnit.MILLISECONDS).build();
         connectionManager.setDefaultConnectionConfig(connectionConfig);
         return connectionManager;
     }
@@ -101,7 +96,7 @@ public class EsupOtpRestTemplate extends RestTemplate {
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         return objectMapper;
-   }
+    }
 
     @Override
     protected ClientHttpRequest createRequest(URI url, HttpMethod method) throws IOException {

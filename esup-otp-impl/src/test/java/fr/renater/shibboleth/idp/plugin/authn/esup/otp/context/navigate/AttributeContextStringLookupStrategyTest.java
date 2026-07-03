@@ -53,7 +53,8 @@ public class AttributeContextStringLookupStrategyTest {
         final String idpAttrMultiple = "multiple";
 
         final IdPAttribute multiple = new IdPAttribute(idpAttrMultiple);
-        multiple.setValues(List.of(StringAttributeValue.valueOf("oneAttribute"), StringAttributeValue.valueOf(null), StringAttributeValue.valueOf("twoAttribute")));
+        multiple.setValues(List.of(StringAttributeValue.valueOf("oneAttribute"), StringAttributeValue.valueOf(null),
+                StringAttributeValue.valueOf("twoAttribute")));
         final AttributeDefinition multipleAttrDef = new MockAttributeDefinition(idpAttrMultiple, multiple);
         multipleAttrDef.initialize();
 
@@ -67,15 +68,18 @@ public class AttributeContextStringLookupStrategyTest {
         final String idpAttrMultipleScoped = "attributeMultipleScoped";
 
         final IdPAttribute multipleScoped = new IdPAttribute(idpAttrMultipleScoped);
-        multipleScoped.setValues(List.of(ScopedStringAttributeValue.valueOf("oneValue", "scope"), ScopedStringAttributeValue.valueOf("twoValue", "scope")));
-        final AttributeDefinition multipleScopedAttrDef = new MockAttributeDefinition(idpAttrMultipleScoped, multipleScoped);
+        multipleScoped.setValues(List.of(ScopedStringAttributeValue.valueOf("oneValue", "scope"),
+                ScopedStringAttributeValue.valueOf("twoValue", "scope")));
+        final AttributeDefinition multipleScopedAttrDef = new MockAttributeDefinition(idpAttrMultipleScoped,
+                multipleScoped);
         multipleScopedAttrDef.initialize();
 
-        final AttributeResolverImpl resolver = newAttributeResolverImpl(List.of(oneAttrDef, multipleAttrDef, scopedAttrDef, multipleScopedAttrDef), null);
+        final AttributeResolverImpl resolver = newAttributeResolverImpl(
+                List.of(oneAttrDef, multipleAttrDef, scopedAttrDef, multipleScopedAttrDef), null);
         strategy.setAttributeResolverService(new MockReloadableService<>(resolver));
     }
 
-    @Test(expectedExceptions=ComponentInitializationException.class)
+    @Test(expectedExceptions = ComponentInitializationException.class)
     public void invalid() throws ComponentInitializationException {
         // No attributeId
         strategy.initialize();

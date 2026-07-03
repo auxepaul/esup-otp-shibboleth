@@ -2,9 +2,20 @@ package fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 
-@Data
+import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@RequiredArgsConstructor
+@ToString
+@EqualsAndHashCode
 public class WebAuthnPublicKeyCredential {
 
     private String id;
@@ -19,7 +30,11 @@ public class WebAuthnPublicKeyCredential {
 
     private String authenticatorAttachment;
 
-    @Data
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     public static class WebAuthnAuthenticatorAssertionResponse {
 
         private byte[] authenticatorData;
@@ -32,7 +47,11 @@ public class WebAuthnPublicKeyCredential {
         private byte[] userHandle;
     }
 
-    @Data
+    @Getter
+    @Setter
+    @RequiredArgsConstructor
+    @ToString
+    @EqualsAndHashCode
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class ClientAssertionExtensionOutputs {
 
@@ -40,7 +59,11 @@ public class WebAuthnPublicKeyCredential {
 
         private LargeBlobAuthenticationOutput largeBlob;
 
-        @Data
+        @Getter
+        @Setter
+        @RequiredArgsConstructor
+        @ToString
+        @EqualsAndHashCode
         public static class LargeBlobAuthenticationOutput {
 
             private byte[] blob;

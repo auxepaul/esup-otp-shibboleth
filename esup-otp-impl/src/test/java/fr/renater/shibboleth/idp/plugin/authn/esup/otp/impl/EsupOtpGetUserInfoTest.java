@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import org.mockito.Mockito;
@@ -36,7 +37,8 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
 
     private EsupOtpClient mockClient;
 
-    @BeforeMethod public void setUp() throws ComponentInitializationException {
+    @BeforeMethod
+    public void setUp() throws ComponentInitializationException {
         super.setUp();
 
         action = new EsupOtpGetUserInfo();
@@ -47,7 +49,7 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         final DefaultEsupOtpIntegration defaultEsupOtpIntegration = new DefaultEsupOtpIntegration();
         defaultEsupOtpIntegration.setAPIHost("https://tobedefine.fr");
         defaultEsupOtpIntegration.setUsersSecret("anUsersSecret");
-        defaultEsupOtpIntegration.setSupportedMethods(List.of("random_code", "push", "bypass", "passcode_grid"));
+        defaultEsupOtpIntegration.setSupportedMethods(Set.of("random_code", "push", "bypass", "passcode_grid"));
         defaultEsupOtpIntegration.initialize();
 
         action.setEsupOtpIntegrationLookupStrategy(prc -> defaultEsupOtpIntegration);
@@ -63,7 +65,8 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         esupOtpContext = prc.ensureSubcontext(AuthenticationContext.class).ensureSubcontext(EsupOtpContext.class);
     }
 
-    @Test public void testNoUsername() throws Exception {
+    @Test
+    public void testNoUsername() throws Exception {
         action = new EsupOtpGetUserInfo();
         action.setUsernameLookupStrategy(FunctionSupport.constant(null));
 
@@ -83,7 +86,8 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testClientException() throws Exception {
+    @Test
+    public void testClientException() throws Exception {
 
         EsupOtpUserInfoResponse esupOtpResponse = new EsupOtpUserInfoResponse();
         esupOtpResponse.setCode("Nok");
@@ -96,7 +100,8 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
 
     }
 
-    @Test public void testNokEsupOtpResponse() throws Exception {
+    @Test
+    public void testNokEsupOtpResponse() throws Exception {
 
         EsupOtpUserInfoResponse esupOtpResponse = new EsupOtpUserInfoResponse();
         esupOtpResponse.setCode("Nok");
@@ -109,7 +114,8 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
 
     }
 
-    @Test public void testValid() throws Exception {
+    @Test
+    public void testValid() throws Exception {
 
         EsupOtpUserInfoResponse esupOtpResponse = new EsupOtpUserInfoResponse();
         esupOtpResponse.setCode("Ok");
@@ -136,10 +142,12 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         Assert.assertEquals(esupOtpContext.getUsername(), "jdoe");
         Assert.assertNull(esupOtpContext.getTokenCode());
         Assert.assertEquals(esupOtpContext.getEnabledChoices(), List.of("random_code.sms"));
-        Assert.assertEquals(esupOtpContext.getConfiguredTransports(), Map.of("sms","06******398", "mail", "ant*******@*******er.fr", "push", "Model Telephone"));
+        Assert.assertEquals(esupOtpContext.getConfiguredTransports(),
+                Map.of("sms", "06******398", "mail", "ant*******@*******er.fr", "push", "Model Telephone"));
     }
 
-    @Test public void testValidByPass() throws Exception {
+    @Test
+    public void testValidByPass() throws Exception {
 
         EsupOtpUserInfoResponse esupOtpResponse = new EsupOtpUserInfoResponse();
         esupOtpResponse.setCode("Ok");
@@ -147,7 +155,7 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         UserMethods methods = new UserMethods();
         UserMethods.UserMethod bypassMethod = new UserMethods.UserMethod();
         bypassMethod.setActive(true);
-        //bypassMethod.setTransports(List.of("sms"));
+        // bypassMethod.setTransports(List.of("sms"));
         methods.setBypass(bypassMethod);
         user.setMethods(methods);
         EsupOtpUserInfoResponse.User.Transports transports = new EsupOtpUserInfoResponse.User.Transports();
@@ -166,7 +174,39 @@ public class EsupOtpGetUserInfoTest extends BaseAuthenticationContextTest {
         Assert.assertEquals(esupOtpContext.getUsername(), "jdoe");
         Assert.assertNull(esupOtpContext.getTokenCode());
         Assert.assertEquals(esupOtpContext.getEnabledChoices(), List.of("bypass"));
-        Assert.assertEquals(esupOtpContext.getConfiguredTransports(), Map.of("sms","06******398", "mail", "ant*******@*******er.fr", "push", "Model Telephone"));
+        Assert.assertEquals(esupOtpContext.getConfiguredTransports(),
+                Map.of("sms", "06******398", "mail", "ant*******@*******er.fr", "push", "Model Telephone"));
+    }
+
+    @Test
+    public void testValidPasscodeGrid() throws Exception {
+
+        EsupOtpUserInfoResponse esupOtpResponse = new EsupOtpUserInfoResponse();
+        esupOtpResponse.setCode("Ok");
+        EsupOtpUserInfoResponse.User user = new EsupOtpUserInfoResponse.User();
+        UserMethods methods = new UserMethods();
+        UserMethods.UserMethod passcodeGridMethod = new UserMethods.UserMethod();
+        passcodeGridMethod.setActive(true);
+        methods.setPasscodeGrid(passcodeGridMethod);
+        user.setMethods(methods);
+        EsupOtpUserInfoResponse.User.Transports transports = new EsupOtpUserInfoResponse.User.Transports();
+        transports.setSms("06******398");
+        transports.setMail("ant*******@*******er.fr");
+        transports.setPush("Model Telephone");
+        user.setTransports(transports);
+        esupOtpResponse.setUser(user);
+
+        Mockito.when(mockClient.getUserInfos(any())).thenReturn(esupOtpResponse);
+
+        final Event event = action.execute(src);
+        ActionTestingSupport.assertProceedEvent(event);
+
+        Mockito.verify(mockClient).getUserInfos("jdoe");
+        Assert.assertEquals(esupOtpContext.getUsername(), "jdoe");
+        Assert.assertNull(esupOtpContext.getTokenCode());
+        Assert.assertEquals(esupOtpContext.getEnabledChoices(), List.of("passcode_grid"));
+        Assert.assertEquals(esupOtpContext.getConfiguredTransports(),
+                Map.of("sms", "06******398", "mail", "ant*******@*******er.fr", "push", "Model Telephone"));
     }
 
 }

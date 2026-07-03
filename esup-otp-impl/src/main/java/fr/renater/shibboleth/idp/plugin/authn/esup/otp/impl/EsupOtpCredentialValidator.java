@@ -14,7 +14,6 @@ import javax.security.auth.login.LoginException;
 
 import org.opensaml.messaging.context.navigate.ChildContextLookup;
 import org.opensaml.profile.context.ProfileRequestContext;
-import org.slf4j.Logger;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
 import fr.renater.shibboleth.esup.otp.EsupOtpPrincipal;
@@ -22,6 +21,7 @@ import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto.WebAuthnPublicKeyCredential;
 import fr.renater.shibboleth.idp.plugin.authn.esup.otp.mapper.WebauthnMapper;
+import lombok.CustomLog;
 import net.shibboleth.idp.authn.AbstractCredentialValidator;
 import net.shibboleth.idp.authn.AuthnEventIds;
 import net.shibboleth.idp.authn.CredentialValidator;
@@ -30,26 +30,28 @@ import net.shibboleth.shared.annotation.constraint.NonnullAfterInit;
 import net.shibboleth.shared.component.ComponentInitializationException;
 import net.shibboleth.shared.logic.Constraint;
 import net.shibboleth.shared.logic.FunctionSupport;
-import net.shibboleth.shared.primitive.LoggerFactory;
 
 /**
  * A {@link CredentialValidator} that checks {@link EsupOtpContext}.
  */
+@CustomLog
 public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
 
-    /** Class logger. */
-    @Nonnull private final Logger log = LoggerFactory.getLogger(EsupOtpCredentialValidator.class);
-
     /** Lookup strategy for EsupOtp context. */
-    @Nonnull private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookupStrategy;
+    @Nonnull
+    private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookupStrategy;
 
     /** Lookup strategy for esup otp integration. */
-    @Nonnull private Function<ProfileRequestContext, DefaultEsupOtpIntegration> esupOtpIntegrationLookupStrategy;
+    @Nonnull
+    private Function<ProfileRequestContext, DefaultEsupOtpIntegration> esupOtpIntegrationLookupStrategy;
 
     /** A regular expression to apply for acceptance testing. */
-    @Nullable private Pattern matchExpression;
+    @Nullable
+    private Pattern matchExpression;
 
-    /** The registry for locating the EsupOtpClient for the established integration.*/
+    /**
+     * The registry for locating the EsupOtpClient for the established integration.
+     */
     @NonnullAfterInit
     private EsupOtpClientRegistry clientRegistry;
 
@@ -63,21 +65,23 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     /**
      * Set the EsupOtp client registry.
      *
-     * @param esupOtpClientRegistry the registry
+     * @param esupOtpClientRegistry
+     *            the registry
      */
     public void setClientRegistry(@Nonnull final EsupOtpClientRegistry esupOtpClientRegistry) {
         checkSetterPreconditions();
 
-        clientRegistry = Constraint.isNotNull(esupOtpClientRegistry,"EsupOtpClient registry can not be null");
+        clientRegistry = Constraint.isNotNull(esupOtpClientRegistry, "EsupOtpClient registry can not be null");
     }
 
     /**
      * Set the lookup strategy to locate the {@link EsupOtpContext}.
      *
-     * @param strategy lookup strategy
+     * @param strategy
+     *            lookup strategy
      */
     public void setEsupOtpContextLookupStrategy(
-            @Nonnull final Function<AuthenticationContext,EsupOtpContext> strategy) {
+            @Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
         checkSetterPreconditions();
 
         esupOtpContextLookupStrategy = Constraint.isNotNull(strategy, "EsupOtpContext lookup strategy cannot be null");
@@ -86,7 +90,8 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     /**
      * Set the lookup strategy to locate/create the {@link EsupOtpContext}.
      *
-     * @param strategy lookup/creation strategy
+     * @param strategy
+     *            lookup/creation strategy
      */
     public void setEsupOtpIntegrationLookupStrategy(
             @Nonnull final Function<ProfileRequestContext, DefaultEsupOtpIntegration> strategy) {
@@ -97,9 +102,10 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     }
 
     /**
-     * Set a matching expression to apply to the username for acceptance. 
+     * Set a matching expression to apply to the username for acceptance.
      *
-     * @param expression a matching expression
+     * @param expression
+     *            a matching expression
      */
     public void setMatchExpression(@Nullable final Pattern expression) {
         checkSetterPreconditions();
@@ -112,17 +118,16 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
     protected void doInitialize() throws ComponentInitializationException {
         super.doInitialize();
 
-        if (clientRegistry ==  null) {
+        if (clientRegistry == null) {
             throw new ComponentInitializationException("EsupOtp Client Registry cannot be null");
         }
     }
 
-// Checkstyle: CyclomaticComplexity OFF
+    // Checkstyle: CyclomaticComplexity OFF
     /** {@inheritDoc} */
     @Override
     protected Subject doValidate(@Nonnull final ProfileRequestContext profileRequestContext,
-            @Nonnull final AuthenticationContext authenticationContext,
-            @Nullable final WarningHandler warningHandler,
+            @Nonnull final AuthenticationContext authenticationContext, @Nullable final WarningHandler warningHandler,
             @Nullable final ErrorHandler errorHandler) throws Exception {
 
         final EsupOtpContext esupOtpContext = esupOtpContextLookupStrategy.apply(authenticationContext);
@@ -135,7 +140,8 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
             throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
         }
 
-        final DefaultEsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy.apply(profileRequestContext);
+        final DefaultEsupOtpIntegration esupOtpIntegration = esupOtpIntegrationLookupStrategy
+                .apply(profileRequestContext);
         if (esupOtpIntegration == null) {
             log.warn("{} No EsupOtpIntegration returned by lookup strategy", getLogPrefix());
             if (errorHandler != null) {
@@ -148,7 +154,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         final EsupOtpClient client = clientRegistry.getClientOrCreate(esupOtpIntegration);
 
         final String username = esupOtpContext.getUsername();
-        if(username == null) {
+        if (username == null) {
             log.info("{} No username available within EsupOtpContext", getLogPrefix());
             if (errorHandler != null) {
                 errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
@@ -159,9 +165,10 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
 
         final WebAuthnPublicKeyCredential assertion = esupOtpContext.getPublicKeyCredentialAssertionResponse();
         final Integer tokenCode = esupOtpContext.getTokenCode();
-        if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
-            if(assertion == null) {
-                log.warn("{} No PublicKeyCredential with authenticator assertion found, can not authenticate '{}'", getLogPrefix(), username);
+        if (WEBAUTHN_METHOD.equals(esupOtpContext.getMethodChoice())) {
+            if (assertion == null) {
+                log.warn("{} No PublicKeyCredential with authenticator assertion found, can not authenticate '{}'",
+                        getLogPrefix(), username);
                 if (errorHandler != null) {
                     errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
                             AuthnEventIds.NO_CREDENTIALS);
@@ -169,7 +176,7 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
                 throw new LoginException(AuthnEventIds.NO_CREDENTIALS);
             }
         } else {
-            if(tokenCode == null) {
+            if (tokenCode == null) {
                 log.warn("{} No tokencode available within EsupOtpContext", getLogPrefix());
                 if (errorHandler != null) {
                     errorHandler.handleError(profileRequestContext, authenticationContext, AuthnEventIds.NO_CREDENTIALS,
@@ -187,40 +194,43 @@ public class EsupOtpCredentialValidator extends AbstractCredentialValidator {
         log.debug("{} Attempting to authenticate token code for '{}' ", getLogPrefix(), esupOtpContext.getUsername());
 
         try {
-            if(WEBAUTHN_METHOD.equals(esupOtpContext.getTransportChoose())) {
-                if(client.postVerifyWebauthn(username, WebauthnMapper.INSTANCE.toEsupOtpVerifyWebAuthnRequestDto(assertion))) {
+            if (WEBAUTHN_METHOD.equals(esupOtpContext.getMethodChoice())) {
+                if (client.postVerifyWebauthn(username,
+                        WebauthnMapper.INSTANCE.toEsupOtpVerifyWebAuthnRequestDto(assertion))) {
                     log.info("{} Login by '{}' with webauthn succeeded", getLogPrefix(), esupOtpContext.getUsername());
                     return populateSubject(new Subject(), esupOtpContext, esupOtpIntegration);
                 }
             } else {
-                if(client.postVerify(username, tokenCode.toString())) {
+                if (client.postVerify(username, tokenCode.toString())) {
                     log.info("{} Login by '{}' succeeded", getLogPrefix(), esupOtpContext.getUsername());
                     return populateSubject(new Subject(), esupOtpContext, esupOtpIntegration);
                 }
             }
             throw new LoginException(AuthnEventIds.INVALID_CREDENTIALS);
         } catch (final Exception e) {
-            log.info("{} Login by '{}' failed", getLogPrefix(), esupOtpContext.getUsername(), e);
+            log.info("{} Login by '{}' failed", getLogPrefix(), esupOtpContext.getUsername());
             if (errorHandler != null) {
-                errorHandler.handleError(profileRequestContext, authenticationContext, e,
-                        AuthnEventIds.INVALID_CREDENTIALS);
+                errorHandler.handleError(profileRequestContext, authenticationContext, e, AuthnEventIds.INVALID_CREDENTIALS);
             }
             throw e;
         }
     }
-// Checkstyle: CyclomaticComplexity ON
+    // Checkstyle: CyclomaticComplexity ON
 
     /**
      * Decorate the subject with "standard" content from the validation.
      *
-     * @param subject the subject being returned
-     * @param esupOtpContext the EsupOtp context being validated
-     * @param esupOtpIntegration the EsupOtp integration
+     * @param subject
+     *            the subject being returned
+     * @param esupOtpContext
+     *            the EsupOtp context being validated
+     * @param esupOtpIntegration
+     *            the EsupOtp integration
      *
      * @return the decorated subject
      */
-    @Nonnull protected Subject populateSubject(@Nonnull final Subject subject,
-            @Nonnull final EsupOtpContext esupOtpContext,
+    @Nonnull
+    protected Subject populateSubject(@Nonnull final Subject subject, @Nonnull final EsupOtpContext esupOtpContext,
             @Nonnull final DefaultEsupOtpIntegration esupOtpIntegration) {
 
         final String username = esupOtpContext.getUsername();

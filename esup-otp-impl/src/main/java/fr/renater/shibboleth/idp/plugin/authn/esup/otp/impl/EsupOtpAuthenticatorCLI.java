@@ -1,6 +1,12 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
+import javax.annotation.Nonnull;
+
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
@@ -9,25 +15,15 @@ import fr.renater.shibboleth.esup.otp.client.EsupOtpClient;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
 import fr.renater.shibboleth.esup.otp.dto.EsupOtpUsersResponse;
 import fr.renater.shibboleth.esup.otp.dto.user.EsupOtpUserInfoResponse;
+import lombok.CustomLog;
 import net.shibboleth.idp.cli.AbstractIdPHomeAwareCommandLine;
 import net.shibboleth.shared.annotation.constraint.NotEmpty;
-import net.shibboleth.shared.primitive.LoggerFactory;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 /**
  * Command line utility for {@link EsupOtpClient}.
  */
+@CustomLog
 public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<EsupOtpAuthenticatorArguments> {
-
-    /** Class logger. */
-    @Nullable private Logger log;
-
     private final ObjectMapper objectMapper;
 
     public EsupOtpAuthenticatorCLI() {
@@ -42,23 +38,23 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull protected Logger getLogger() {
-        if (log == null) {
-            log = LoggerFactory.getLogger(EsupOtpAuthenticatorCLI.class);
-        }
-        assert log != null;
+    @Nonnull
+    protected Logger getLogger() {
         return log;
     }
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull protected Class<EsupOtpAuthenticatorArguments> getArgumentClass() {
+    @Nonnull
+    protected Class<EsupOtpAuthenticatorArguments> getArgumentClass() {
         return EsupOtpAuthenticatorArguments.class;
     }
 
     /** {@inheritDoc} */
     @Override
-    @Nonnull @NotEmpty protected String getVersion() {
+    @Nonnull
+    @NotEmpty
+    protected String getVersion() {
         final String result = getClass().getPackage().getImplementationVersion();
         assert result != null;
         return result;
@@ -77,7 +73,7 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
 
             final EsupOtpClient client = new EsupOtpClientRegistry().getClientOrCreate(integration);
 
-            if("all".equals(args.getCommand())) {
+            if ("all".equals(args.getCommand())) {
                 final EsupOtpUsersResponse userUids = client.getUsers();
                 final String response = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(userUids);
                 System.out.println("EsupOtpUsersResponse: \n" + response);
@@ -130,8 +126,9 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
 
     /**
      * CLI entry point.
-     * 
-     * @param args arguments
+     *
+     * @param args
+     *            arguments
      */
     public static void main(@Nonnull final String[] args) {
         System.exit(new EsupOtpAuthenticatorCLI().run(args));

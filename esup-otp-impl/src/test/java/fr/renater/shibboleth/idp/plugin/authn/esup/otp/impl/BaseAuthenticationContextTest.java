@@ -27,25 +27,25 @@ public class BaseAuthenticationContextTest extends OpenSAMLInitBaseTestCase {
     protected EsupOtpContext eoc;
     protected List<AuthenticationFlowDescriptor> authenticationFlows;
 
-    protected void initializeMembers() throws ComponentInitializationException {        
+    protected void initializeMembers() throws ComponentInitializationException {
         src = new RequestContextBuilder().buildRequestContext();
         prc = new WebflowRequestContextProfileRequestContextLookup().apply(src);
         ac = new AuthenticationContext();
         prc.addSubcontext(ac, true);
 
-        authenticationFlows = List.of(new AuthenticationFlowDescriptor(),
-                new AuthenticationFlowDescriptor(), new AuthenticationFlowDescriptor());
+        authenticationFlows = List.of(new AuthenticationFlowDescriptor(), new AuthenticationFlowDescriptor(),
+                new AuthenticationFlowDescriptor());
         authenticationFlows.get(0).setId("test1");
         authenticationFlows.get(1).setId("test2");
         authenticationFlows.get(1).setPassiveAuthenticationSupported(true);
         authenticationFlows.get(2).setId("test3");
     }
 
-    protected void setUp() throws ComponentInitializationException {        
+    protected void setUp() throws ComponentInitializationException {
         initializeMembers();
-        
+
         final PopulateAuthenticationContext action = new PopulateAuthenticationContext();
-        assert authenticationFlows!= null;
+        assert authenticationFlows != null;
         action.setAvailableFlows(authenticationFlows);
         action.setPotentialFlowsLookupStrategy(FunctionSupport.constant(authenticationFlows));
         action.initialize();
@@ -53,11 +53,12 @@ public class BaseAuthenticationContextTest extends OpenSAMLInitBaseTestCase {
         action.execute(src);
     }
 
-    @Nonnull protected final MockHttpServletRequest getMockHttpServletRequest(final AbstractAuthenticationAction action) {
+    @Nonnull
+    protected final MockHttpServletRequest getMockHttpServletRequest(final AbstractAuthenticationAction action) {
         assert action != null;
         final HttpServletRequest req = action.getHttpServletRequest();
         assert req != null;
-        return (MockHttpServletRequest)req;
+        return (MockHttpServletRequest) req;
     }
 
     protected void addEsupOtpContext() {

@@ -1,25 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:util="http://www.springframework.org/schema/util"
-       xmlns:p="http://www.springframework.org/schema/p"
-       xmlns:c="http://www.springframework.org/schema/c"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
-                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
-                           
-       default-init-method="initialize"
-       default-destroy-method="destroy">
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:util="http://www.springframework.org/schema/util"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:c="http://www.springframework.org/schema/c"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+    default-init-method="initialize"
+    default-destroy-method="destroy">
 
     <!-- Esup Otp Integration -->
     <bean id="EsupOtpIntegration" lazy-init="true"
-          class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
-          p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
-          p:apiPassword="%{idp.esup.otp.apiPassword:none}"
-          p:issuer="%{idp.entityID}"
-          p:registeredRedirectURI="%{idp.esup.otp.redirectURL:}"
-          p:healthCheckEndpoint="%{idp.esup.otp.endpoint.health:/v1/health_check}" />
+        class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
+        p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
+        p:apiPassword="%{idp.esup.otp.apiPassword:none}"
+        p:issuer="%{idp.entityID}"
+        p:codeLength="%{idp.esup.otp.codeLength:6}" />
 
     <!--<bean id="EsupOtpClient" class="fr.renater.shibboleth.esup.otp.client.impl.EsupOtpClientImpl" lazy-init="true"
           p:restTemplate-ref="" />-->

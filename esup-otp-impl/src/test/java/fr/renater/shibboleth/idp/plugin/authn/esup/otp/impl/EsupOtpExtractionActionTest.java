@@ -27,16 +27,17 @@ import static org.mockito.ArgumentMatchers.any;
  *
  */
 public class EsupOtpExtractionActionTest extends BaseAuthenticationContextTest {
-    
+
     private EsupOtpExtractionAction action;
 
     private EsupOtpContext esupOtpContext;
 
     private EsupOtpClient mockClient;
-    
-    @BeforeMethod public void setUp() throws ComponentInitializationException {
+
+    @BeforeMethod
+    public void setUp() throws ComponentInitializationException {
         super.setUp();
-        
+
         action = new EsupOtpExtractionAction();
         final MockHttpServletRequest request = new MockHttpServletRequest();
         action.setHttpServletRequestSupplier(new ConstantSupplier<>(request));
@@ -59,8 +60,9 @@ public class EsupOtpExtractionActionTest extends BaseAuthenticationContextTest {
 
         esupOtpContext = prc.ensureSubcontext(AuthenticationContext.class).ensureSubcontext(EsupOtpContext.class);
     }
-    
-    @Test public void testNoServlet() throws Exception {
+
+    @Test
+    public void testNoServlet() throws Exception {
         action = new EsupOtpExtractionAction();
         action.setUsernameLookupStrategy(FunctionSupport.constant("jdoe"));
 
@@ -75,11 +77,12 @@ public class EsupOtpExtractionActionTest extends BaseAuthenticationContextTest {
 
         action.initialize();
         final Event event = action.execute(src);
-        
+
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
-    
-    @Test public void testNoUsername() throws Exception {
+
+    @Test
+    public void testNoUsername() throws Exception {
         action = new EsupOtpExtractionAction();
         action.setUsernameLookupStrategy(FunctionSupport.constant(null));
 
@@ -95,16 +98,18 @@ public class EsupOtpExtractionActionTest extends BaseAuthenticationContextTest {
         action.initialize();
 
         final Event event = action.execute(src);
-        
+
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testMissingField() throws Exception {
+    @Test
+    public void testMissingField() throws Exception {
         final Event event = action.execute(src);
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    @Test public void testWrongField() throws Exception {
+    @Test
+    public void testWrongField() throws Exception {
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
             mock.addParameter("Bar", "123456");
         }
@@ -113,18 +118,19 @@ public class EsupOtpExtractionActionTest extends BaseAuthenticationContextTest {
         ActionTestingSupport.assertEvent(event, AuthnEventIds.NO_CREDENTIALS);
     }
 
-    /*@Test public void testInvalidFormat() throws Exception {
-        if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
-            mock.addParameter("tokencode", "A123456");
-        }
+    /*
+     * @Test public void testInvalidFormat() throws Exception { if
+     * (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
+     * mock.addParameter("token", "A123456"); }
+     * 
+     * final Event event = action.execute(src);
+     * ActionTestingSupport.assertEvent(event, AuthnEventIds.INVALID_CREDENTIALS); }
+     */
 
-        final Event event = action.execute(src);
-        ActionTestingSupport.assertEvent(event, AuthnEventIds.INVALID_CREDENTIALS);
-    }*/
-
-    @Test public void testValidRandomCodeSms() throws Exception {
+    @Test
+    public void testValidRandomCodeSms() throws Exception {
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
-            mock.addParameter("transportchoose", "random_code.sms");
+            mock.addParameter("methodchoice", "random_code.sms");
         }
 
         Map<String, String> transportConfigured = new HashMap<>();
@@ -144,9 +150,10 @@ public class EsupOtpExtractionActionTest extends BaseAuthenticationContextTest {
         Mockito.verify(mockClient).postSendMessage("jdoe", "random_code", "sms");
     }
 
-    @Test public void testValidPush() throws Exception {
+    @Test
+    public void testValidPush() throws Exception {
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
-            mock.addParameter("transportchoose", "push");
+            mock.addParameter("methodchoice", "push");
         }
 
         Map<String, String> transportConfigured = new HashMap<>();
