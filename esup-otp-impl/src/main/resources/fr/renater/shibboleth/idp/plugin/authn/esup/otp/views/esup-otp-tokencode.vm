@@ -26,7 +26,7 @@
 ##
 #set ($method = $esupOtpContext.getMethodChoice())
 ##
-#if ("push" == $method || "webauthn" == $method)
+#if ("push" == $method)
   #set ($apiUrl = $environment.getProperty("idp.esup.otp.apiHost"))
 #elseif ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method)
   #set ($sendCounter = $environment.getProperty('idp.esup.otp.send.counter', -1))
@@ -45,13 +45,14 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
 <!DOCTYPE html>
 <html>
     <head>
-        <title>#springMessageText("idp.title", "Web Login Service")</title>
+        <title>#springMessageText("idp.esup.otp.token.title", "Strong authentication with EsupOTP") - #springMessageText("idp.title", "Web Login Service")</title>
         <meta charset="UTF-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
         <link rel="stylesheet" type="text/css" href="$request.getContextPath()#springMessageText("idp.css", "/css/placeholder.css")">
         <script src="$request.getContextPath()/js/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="></script>
-        #if ("push" == $method)
+        #if ("push" == $method || "webauthn" == $method)
+            #if ("push" == $method)
             <script src="$apiUrl/js/socket.io.js"></script>
             <script type="text/javascript" #if ($nonce)nonce="$nonce"#end>
                 // Fonction d'initialisation du socket
@@ -63,14 +64,20 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     });
                     socket.on('connect', function () {
                         console.log("Socket connect");
+                        hideErrors();
+                        displayInfos("Load");
                     });
                     socket.on('userAuth', function (data) {
                         if (data.code == "Ok") {
+                          hideErrors();
+                          displayInfos("Ok");
                           submitCode(data.otp);
                         }
                     });
                     socket.on('connect_error', (err) => {
                         console.log('Socket connection error: ' + err.message);
+                        hideInfos();
+                        displayErrors(err.name);
                     });
                 }
 
@@ -80,6 +87,171 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                 }
 
                 initializeSocket();
+            #end
+            #if ("webauthn" == $method)
+            <script type="module" #if ($nonce)nonce="$nonce"#end>
+                import {
+                    get,
+                    parseRequestOptionsFromJSON,
+                    supported,
+                } from "$request.getContextPath()/js/webauthn-json.browser-ponyfill.js";
+
+                window.addEventListener("load", () => {
+                    try {
+                        var isSupported = supported();
+                        if (!isSupported) {
+                            console.error("WebAuthn not supported");
+                            hideInfos();
+                            displayErrors("NotSupported");
+                        } else {
+                            const authenticate_elem = document.getElementById("authenticate")
+                            authenticate_elem.onclick = authenticate;
+                            authenticate_elem.click();
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        hideInfos();
+                        displayErrors(e.name);
+                    }
+                });
+
+                async function authenticate() {
+                    // Some UI changes
+                    try {
+                        hideErrors();
+                        displayInfos("Load");
+                    } catch (e) {
+                        // No issue if this does not work
+                    }
+                    #if($esupOtpContext.getWebauthnCredentialRequestOptions() && !$esupOtpContext.getWebauthnCredentialRequestOptions().empty)
+                    var pkCredRequestOptions = $esupOtpEncoder.serializePublicKeyCredentialRequestOptionsAsJSON($esupOtpContext.getWebauthnCredentialRequestOptions())
+                    var parsedRequestOptions = parseRequestOptionsFromJSON(pkCredRequestOptions);
+                    await get(parsedRequestOptions)
+                        .then(function (pkCredAssertion) {
+                            hideErrors();
+                            displayInfos("Ok");
+                            document.getElementById("publicKeyCredential").value = JSON.stringify(pkCredAssertion);
+                            document.getElementById("authenticationSubmit").click();
+                        }).catch(function (err) {
+                            console.error(err);
+                            hideInfos();
+                            displayErrors(err.name);
+                        });
+                    #else
+                    hideInfos();
+                    displayErrors("NoRegisteredDevice");
+                    #end
+                }
+            #end
+                function hideInfos() {
+                    const info_elem = document.getElementById("info");
+                    info_elem.disabled = true;
+                    info_elem.classList.add('hidden');
+                }
+
+                function hideErrors() {
+                    const error_elem = document.getElementById("error");
+                    error_elem.disabled = true;
+                    error_elem.classList.add('hidden');
+                }
+
+                function displayInfos(info_name) {
+                  #if ("push" == $method)
+                    const retry_button_id = "retryButton"
+                  #else
+                    const retry_button_id = "authenticate"
+                  #end
+
+                    let infoMessage = "";
+                    let enable_loader = true;
+                    let enable_retry = false;
+
+                    switch (info_name) {
+                      case "Load":
+                      #if ("push" == $method)
+                        infoMessage = "#springMessageText('idp.esup.otp.wait', 'Waiting the validation on your device...')";
+                      #else
+                        infoMessage = "#springMessageText('idp.esup.otp.webauthn.inprogress', 'Authenticating...')";
+                      #end
+                        enable_loader = true;
+                      break;
+                      case "Ok":
+                      #if ("push" == $method)
+                        infoMessage = "#springMessageText('idp.esup.otp.push.ok', 'The push notification has been validated...')";
+                      #else
+                        infoMessage = "#springMessageText('idp.esup.otp.webauthn.ok', 'The WebAuthn has been done with success...')";
+                      #end
+                        enable_loader = false;
+                      break;
+                      default:
+                        infoMessage = "Unknow Message: " + info_name;
+                    }
+
+                    const info_elem = document.getElementById("info");
+                    document.getElementById("info_message").textContent = infoMessage;
+
+                    info_elem.disabled = false;
+                    info_elem.classList.remove('hidden');
+
+                    document.getElementById(retry_button_id).disabled = true;
+
+                    const loader_elem = document.getElementById("loader");
+
+                    if(enable_loader) {
+                        loader.disabled = false;
+                        loader.classList.remove('hidden');
+                    } else {
+                        loader.classList.add('hidden');
+                        loader.disabled = true;
+                    }
+                }
+
+                function displayErrors(err_name) {
+                  #if ("push" == $method)
+                    const retry_button_id = "retryButton"
+                    const form_id = "pushForm";
+                  #else
+                    const retry_button_id = "authenticate"
+                    const form_id = "authenticator_assertion_form";
+                  #end
+
+                    let errorMessage = "#springMessageText('idp.esup.otp.error', 'Initialization 2FA exception occured.')";
+                    const errorNoRetryMessage = "#springMessageText('idp.esup.otp.try.another.method', 'Please try another method.')";
+                    const errorRetryMessage = "#springMessageText('idp.esup.otp.errorRetry.message', 'The 2FA authentication failed, please retry.')";
+                    let enable_retry = true;
+
+                    switch (err_name) {
+                      case "NotSupported":
+                        errorMessage =  "#springMessageText('idp.esup.otp.webauthn.notSupported', 'The hardware authenticator (Webauthn) is not available')";
+                        enable_retry = false;
+                      break;
+                      case "NoRegisteredDevice":
+                        errorMessage =  "#springMessageText('idp.esup.otp.webauthn.noDevice', 'You have no registered factors.')";
+                        enable_retry = false;
+                      break;
+                      case "NotAllowedError":
+                        errorMessage = "#springMessageText('idp.esup.otp.webauthn.notAllowed', 'The WebAuthn authentication was not allowed.')";
+                        enable_retry = true;
+                      break;
+                      default:
+                        errMessage = "Unknow Message: " + err_name;
+                    }
+
+                    const error_elem = document.getElementById("error");
+                    document.getElementById("error_message").textContent = errorMessage;
+
+                    error_elem.disabled = false;
+                    error_elem.classList.remove('hidden');
+
+                    if(enable_retry) {
+                        document.getElementById("error_retry_message").textContent = errorRetryMessage;
+                        document.getElementById(retry_button_id).disabled = false;
+                        document.getElementById(form_id).disabled = false;
+                    } else {
+                        document.getElementById(retry_button_id).disabled = true;
+                        document.getElementById(form_id).disabled = true;
+                    }
+                }
             </script>
             <style #if ($nonce)nonce="$nonce"#end>
                 .loader {
@@ -96,65 +268,9 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                     0% { transform: rotate(0deg); }
                     100% { transform: rotate(360deg); }
                 }
-            </style>
-        #elseif ("webauthn" == $method)
-            <script type="module" #if ($nonce)nonce="$nonce"#end>
-                import {
-                    get,
-                    parseRequestOptionsFromJSON,
-                    supported,
-                } from "$request.getContextPath()/js/webauthn-json.browser-ponyfill.js";
 
-                window.addEventListener("load", () => {
-                    try {
-                        var isSupported = supported();
-                        if (!isSupported) {
-                            document.getElementById("authenticate").disabled = true;
-                            document.getElementById("authenticator_assertion_form").disabled = true;
-                            document.getElementById("error").disabled = false;
-                            document.getElementById('error').classList.remove('hidden')
-                        } else {
-                            document.getElementById("authenticate").onclick = authenticate;
-                            document.getElementById("authenticate").click();
-                        }
-                    } catch (e) {
-                        console.error(e);
-                    }
-                });
-
-                async function authenticate() {
-                    // Some UI changes
-                    try {
-                        document.getElementById('authenticate').textContent='#springMessageText("idp.esup.otp.webauthn.inprogress", "Authenticating...")'
-                    } catch (e) {
-                        // No issue if this does not work
-                    }
-                    #if($esupOtpContext.getWebauthnCredentialRequestOptions() && !$esupOtpContext.getWebauthnCredentialRequestOptions().empty) 
-                    var pkCredRequestOptions = $esupOtpEncoder.serializePublicKeyCredentialRequestOptionsAsJSON($esupOtpContext.getWebauthnCredentialRequestOptions())
-                    var parsedRequestOptions = parseRequestOptionsFromJSON(pkCredRequestOptions);
-                    await get(parsedRequestOptions)
-                        .then(function (pkCredAssertion) {
-                            document.getElementById("publicKeyCredential").value = JSON.stringify(pkCredAssertion);
-                            document.getElementById("authenticationSubmit").click();
-                        }).catch(function (err) {
-                            console.error(err);
-                            document.getElementById("authenticate").textContent="#springMessageText('idp.esup.otp.webauthn.retry', 'Login failed, please retry the WebAuthn authentication')"
-                        });
-                    #else
-                    console.error("no webauthn credentials, use another method");
-                    document.getElementById("authenticate").textContent="#springMessageText('idp.esup.otp.webauthn.retry', 'Login failed, please retry the WebAuthn authentication')"
-                    #end
-                }
-            </script>
-            <style #if ($nonce)nonce="$nonce"#end>
                 .hidden {
                     display: none;
-                }
-
-                .center {
-                    margin-left: auto;
-                    margin-right: auto;
-                    text-align: center;
                 }
             </style>
         #elseif ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method)
@@ -339,7 +455,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
         #end
     </head>
     <body #if ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method) onLoad="$onLoad" #end>
-        <main class="main">
+        <main id="main" role="main">
             <header>
                 <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/placeholder-logo.png")" alt="#springMessageText("idp.logo.alt-text", "logo")" />
 
@@ -350,69 +466,45 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
             </header>
 
             <section>
-                #*
-                //
-                //    SP Description & Logo (optional)
-                //    These idpui lines will display added information (if available
-                //    in the metadata) about the Service Provider (SP) that requested
-                //    authentication. These idpui lines are "active" in this example
-                //    (not commented out) - this extra SP info will be displayed.
-                //    Remove or comment out these lines to stop the display of the
-                //    added SP information.
-                //
-                *#
-                #set ($logo = $rpUIContext.getLogo())
-                #if ($logo)
-                    <img class="service-logo" src= "$encoder.encodeForHTMLAttribute($logo)" alt="$encoder.encodeForHTMLAttribute($serviceName)">
-                #end
-                #set ($desc = $rpUIContext.getServiceDescription())
-                #if ($desc)
-                    <p>$encoder.encodeForHTML($desc)</p>
-                #end
-
-                #parse("esup-otp-error.vm")
-
-                #if ("push" == $method)
-                    <form id="pushForm" action="$flowExecutionUrl" method="post">
+                #if ("push" == $method || "webauthn" == $method)
+                <div>
+                    <div id="info" class="output-message hidden">
+                        <div>
+                            <span id="info_message">#springMessageText("idp.esup.otp.wait", "Waiting the validation on your device...")</span>
+                            <div id="loader" class="loader"></div>
+                        </div>
+                    </div>
+                    <div id="error" class="output-message output--error hidden">
+                        <p>
+                            <span id="error_message">#springMessageText("idp.esup.otp.error", "Initialization 2FA exception occured.")</span>
+                            <br/><br/><span id="error_retry_message">#springMessageText("idp.esup.otp.try.another.method", "Please use another method.")</span>
+                        </p>
+                    </div>
+                    #if ("push" == $method)
+                    <form id="pushForm" role="form" action="$flowExecutionUrl" method="post">
                         #parse("csrf/csrf.vm")
                         <input type="hidden" id="token" name="token" type="text" value="" />
-                        <button id="submitPush" style="display: none;" type="submit" name="_eventId_proceed"
+                        <button class="hidden" id="submitPush" type="submit" name="_eventId_proceed"
                                 onClick="$onClick">#springMessageText("idp.esup.otp.send", "Send")</button>
                     </form>
-
-                    <article>
-                        <p class="output-message output--warning">
-                            #springMessageText("idp.esup.otp.push.wait", "Waiting the validation on your device...")
-                        </p>
-                        <div class="loader"></div>
-                    </article>
-                    <article>
-                        <button class="button float-left" type="submit" name="_eventId_resend" id="retryButton"
-                                onClick="$onClickResend">#springMessageText("idp.esup.otp.push.resend", "Resend push notification")</button>
-                    </article>
-                #elseif ("webauthn" == $method)
+                    <button class="button float-right" type="submit" name="_eventId_resend" id="retryButton"
+                        onClick="$onClickResend">#springMessageText("idp.esup.otp.push.resend", "Request a new push notification")
+                    </button>
+                    #elseif ("webauthn" == $method)
                     <form id="authenticator_assertion_form" action="$flowExecutionUrl" method="post">
                         #parse("csrf/csrf.vm")
                         <input type="hidden" id="publicKeyCredential" name="publicKeyCredential" />
                         <button class="hidden" id="authenticationSubmit" type="submit"
                                 name="_eventId_proceed">#springMessageText("idp.esup.otp.webauthn.submit", "Submit authentication")</button>
                     </form>
-                    <div class="center">
-                        <button class="button" id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate", "Login with a passkey or a security key (WebAuthn)")</button>
-                    </div>
-
-                    <article id="error" class="hidden">
-                        <p class="output-message output--error">
-                            #springMessageText("idp.esup.otp.error", "Initialization 2FA exception occured.")
-                            <br/><br/>
-                            #springMessageText("idp.esup.otp.try.another.method", "Please try another method.")
-                        </p>
-                    </article>
+                    <button class="button float-right" id="authenticate">#springMessageText("idp.esup.otp.webauthn.authenticate", "Login with a passkey or a security key (WebAuthn)")</button>
+                    #end
+                </div>
                 #elseif ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method)
-                    <form action="$flowExecutionUrl" method="post">
+                    <form role="form" action="$flowExecutionUrl" method="post">
                         #parse("csrf/csrf.vm")
 
-                        <fieldset class="margin-top">
+                        <fieldset>
                         #if ("bypass" == $method)
                             <label for="token">#springMessageText("idp.esup.otp.token.label.bypass", "Please enter one of your unused backup codes:")</label>
                         #elseif ("totp" == $method)
@@ -445,14 +537,15 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         </fieldset>
                     </form>
                 #else
-                    <article>
-                        <p class="output-message output--warning">
+                    <div class="output-message">
+                        <p>
                             #springMessageText("idp.esup.otp.nochoices", "You have no registered authentication method.")
                             <br/><br/>
                             #springMessageText("idp.esup.otp.nochoices.activate","To access this service, activate the multi-factor authentication ") <a href='${managerLink}' target='_blank'>#springMessageText("idp.esup.otp.nochoices.here","here")</a>.
                         </p>
-                    </article>
+                    </div>
                 #end
+
                 <ul>
                     <li><a href="${managerLink}">#springMessageText("idp.esup.otp.updatechoices", "Update your authentication choices?")</a></li>
                     <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>
@@ -460,6 +553,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                 </ul>
             </section>
         </main>
+
         <footer class="footer">
             <div class="cc">
                 <p>#springMessageText("idp.footer", "Insert your footer text here.")</p>
