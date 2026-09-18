@@ -1,6 +1,7 @@
 package fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl;
 
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.PUSH_METHOD;
+import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.TOTP_METHOD;
 import static fr.renater.shibboleth.idp.plugin.authn.esup.otp.util.EsupOtpUtils.WEBAUTHN_METHOD;
 
 import fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration;
@@ -111,7 +112,7 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
 
     @Test
     public void testValid() throws Exception {
-        eoc.setMethodChoice(PUSH_METHOD);
+        eoc.setMethodChoice(TOTP_METHOD);
         if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
             mock.addParameter("token", "123456");
         }
@@ -122,7 +123,23 @@ public class EsupOtpExtractionTokenActionTest extends BaseAuthenticationContextT
         final EsupOtpContext esupOtpCtx = authCtx.getSubcontext(EsupOtpContext.class);
         assert esupOtpCtx != null;
         Assert.assertEquals(esupOtpCtx.getUsername(), "jdoe");
-        Assert.assertEquals(esupOtpCtx.getTokenCode(), Integer.valueOf(123456));
+        Assert.assertEquals(esupOtpCtx.getTokenCode(), "123456");
+    }
+
+    @Test
+    public void testValid0() throws Exception {
+        eoc.setMethodChoice(TOTP_METHOD);
+        if (action.getHttpServletRequest() instanceof MockHttpServletRequest mock) {
+            mock.addParameter("token", "023456");
+        }
+
+        final Event event = action.execute(src);
+        ActionTestingSupport.assertProceedEvent(event);
+        final AuthenticationContext authCtx = prc.ensureSubcontext(AuthenticationContext.class);
+        final EsupOtpContext esupOtpCtx = authCtx.getSubcontext(EsupOtpContext.class);
+        assert esupOtpCtx != null;
+        Assert.assertEquals(esupOtpCtx.getUsername(), "jdoe");
+        Assert.assertEquals(esupOtpCtx.getTokenCode(), "023456");
     }
 
     @Test

@@ -61,45 +61,23 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
         <main id="main" role="main">
             <header>
                 <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/placeholder-logo.png")" alt="#springMessageText("idp.logo.alt-text", "logo")" />
-
                 #set ($serviceName = $rpUIContext.serviceName)
                 #if ($serviceName && !$rpContext.getRelyingPartyId().contains($serviceName))
                     <h1>#springMessageText("idp.login.loginTo", "Login to") $encoder.encodeForHTML($serviceName)</h1>
                 #end
             </header>
-
             <section>
                 <form role="form" action="$flowExecutionUrl" method="post">
                     #parse("csrf/csrf.vm")
-
-                    #*
-                    //
-                    //    SP Description & Logo (optional)
-                    //    These idpui lines will display added information (if available
-                    //    in the metadata) about the Service Provider (SP) that requested
-                    //    authentication. These idpui lines are "active" in this example
-                    //    (not commented out) - this extra SP info will be displayed.
-                    //    Remove or comment out these lines to stop the display of the
-                    //    added SP information.
-                    //
-                    *#
-                    #set ($logo = $rpUIContext.getLogo())
-                    #if ($logo)
-                        <img class="service-logo" src= "$encoder.encodeForHTMLAttribute($logo)" alt="$encoder.encodeForHTMLAttribute($serviceName)">
-                    #end
-                    #set ($desc = $rpUIContext.getServiceDescription())
-                    #if ($desc)
-                        <p>$encoder.encodeForHTML($desc)</p>
-                    #end
                     #parse("esup-otp-error.vm")
                     #if ($esupOtpContext.getEnabledChoices().isEmpty())
-                       <article>
-                            <p class="output-message output--warning">
+                       <div>
+                            <p class="output-message">
                                 #springMessageText("idp.esup.otp.nochoices", "You have no registered authentication method.")
                                 <br/><br/>
                                 #springMessageText("idp.esup.otp.nochoices.activate","To access this service, activate the multi-factor authentication ") <a href='${managerLink}' target='_blank'>#springMessageText("idp.esup.otp.nochoices.here","here")</a>.
                             </p>
-                        </article>
+                        </div>
                     #else
                         <fieldset>
                             <label for="methodChoices">#springMessageText("idp.esup.otp.methodchoices", "Choose an authentication method:")</label>
@@ -121,7 +99,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         </fieldset>
                     #end
                 </form>
-
                 <ul>
                     <li><a href="${managerLink}">#springMessageText("idp.esup.otp.updatechoices", "Update your authentication choices?")</a></li>
                     <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>

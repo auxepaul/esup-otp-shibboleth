@@ -458,13 +458,11 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
         <main id="main" role="main">
             <header>
                 <img class="main-logo" src="$request.getContextPath()#springMessageText("idp.logo", "/images/placeholder-logo.png")" alt="#springMessageText("idp.logo.alt-text", "logo")" />
-
                 #set ($serviceName = $rpUIContext.serviceName)
                 #if ($serviceName && !$rpContext.getRelyingPartyId().contains($serviceName))
                     <h1>#springMessageText("idp.login.loginTo", "Login to") $encoder.encodeForHTML($serviceName)</h1>
                 #end
             </header>
-
             <section>
                 #if ("push" == $method || "webauthn" == $method)
                 <div>
@@ -503,7 +501,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                 #elseif ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method)
                     <form role="form" action="$flowExecutionUrl" method="post">
                         #parse("csrf/csrf.vm")
-
                         <fieldset>
                         #if ("bypass" == $method)
                             <label for="token">#springMessageText("idp.esup.otp.token.label.bypass", "Please enter one of your unused backup codes:")</label>
@@ -545,7 +542,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         </p>
                     </div>
                 #end
-
                 <ul>
                     <li><a href="${managerLink}">#springMessageText("idp.esup.otp.updatechoices", "Update your authentication choices?")</a></li>
                     <li><a href="#springMessageText("idp.url.password.reset", '#')">#springMessageText("idp.login.forgotPassword", "Forgot your password?")</a></li>
@@ -553,7 +549,6 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                 </ul>
             </section>
         </main>
-
         <footer class="footer">
             <div class="cc">
                 <p>#springMessageText("idp.footer", "Insert your footer text here.")</p>

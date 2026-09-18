@@ -15,9 +15,12 @@
     <bean id="EsupOtpIntegration" lazy-init="true"
         class="fr.renater.shibboleth.esup.otp.DefaultEsupOtpIntegration"
         p:APIHost="%{idp.esup.otp.apiHost:http://localhost}"
+        p:usersSecret="%{idp.esup.otp.usersSecret:none}"
         p:apiPassword="%{idp.esup.otp.apiPassword:none}"
-        p:issuer="%{idp.entityID}"
-        p:codeLength="%{idp.esup.otp.codeLength:6}" />
+        p:issuer="%{idp.esup.otp.issuer}"
+        p:supportedMethods="%{idp.esup.otp.supportedMethods:totp,webauthn,push,bypass,passcode_grid,random_code,random_code_mail}"
+        p:codeLength="%{idp.esup.otp.codeLength:6}"
+        p:maxRetry="%{idp.esup.otp.send.counter:3}" />
 
     <!--<bean id="EsupOtpClient" class="fr.renater.shibboleth.esup.otp.client.impl.EsupOtpClientImpl" lazy-init="true"
           p:restTemplate-ref="" />-->

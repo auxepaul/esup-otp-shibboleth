@@ -59,7 +59,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
 
     /** Creation strategy for esup otp context. */
     @Nonnull
-    private Function<AuthenticationContext, EsupOtpContext> esupOtpContextCreationStrategy;
+    private Function<AuthenticationContext, EsupOtpContext> esupOtpContextLookup;
 
     /** Lookup strategy for esup otp integration. */
     @Nonnull
@@ -68,7 +68,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
     /** Constructor. */
     public EsupOtpExtractionTokenAction() {
         usernameLookupStrategy = new CanonicalUsernameLookupStrategy();
-        esupOtpContextCreationStrategy = new ChildContextLookup<>(EsupOtpContext.class);
+        esupOtpContextLookup = new ChildContextLookup<>(EsupOtpContext.class);
 
         esupOtpIntegrationLookupStrategy = FunctionSupport.constant(null);
     }
@@ -96,8 +96,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
             @Nonnull final Function<AuthenticationContext, EsupOtpContext> strategy) {
         checkSetterPreconditions();
 
-        esupOtpContextCreationStrategy = Constraint.isNotNull(strategy,
-                "EsupOtpContext creation strategy cannot be null");
+        esupOtpContextLookup = Constraint.isNotNull(strategy, "EsupOtpContext creation strategy cannot be null");
     }
 
     /**
@@ -110,8 +109,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
             @Nonnull final Function<ProfileRequestContext, DefaultEsupOtpIntegration> strategy) {
         checkSetterPreconditions();
 
-        esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy,
-                "EsupOtpIntegration creation strategy cannot be null");
+        esupOtpIntegrationLookupStrategy = Constraint.isNotNull(strategy, "EsupOtpIntegration creation strategy cannot be null");
     }
 
     /** {@inheritDoc} */
@@ -122,7 +120,7 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
         // Clear error state.
         authenticationContext.removeSubcontext(AuthenticationErrorContext.class);
 
-        final EsupOtpContext esupOtpContext = esupOtpContextCreationStrategy.apply(authenticationContext);
+        final EsupOtpContext esupOtpContext = esupOtpContextLookup.apply(authenticationContext);
         if (esupOtpContext == null) {
             log.warn("{} Unable to create esup otp context", getLogPrefix());
             ActionSupport.buildEvent(profileRequestContext, EventIds.INVALID_PROFILE_CTX);
@@ -185,17 +183,14 @@ public class EsupOtpExtractionTokenAction extends AbstractAuthenticationAction {
 
         } else {
             final String code = extractCode(request);
-            if (code == null) {
-                log.debug("{} Token code is null", getLogPrefix());
+            if (code == null || code.isBlank()) {
+                log.debug("{} Token code is null or blank", getLogPrefix());
                 ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.NO_CREDENTIALS);
-                return;
-            }
-
-            try {
-                esupOtpContext.setTokenCode(Integer.valueOf(code));
-                log.debug("Get token code : {}", esupOtpContext.getTokenCode());
-            } catch (final NumberFormatException e) {
-                log.warn("{} Exception converting code string to an integer", getLogPrefix(), e);
+            } else if(code.matches("\\d+")) {
+                    esupOtpContext.setTokenCode(code);
+                log.debug("{} Get token code : {}", getLogPrefix(), esupOtpContext.getTokenCode());
+            } else {
+                log.warn("{} Token code is invalid (not an integer)", getLogPrefix());
                 authenticationContext.ensureSubcontext(AuthenticationErrorContext.class).getClassifiedErrors()
                         .add(AuthnEventIds.INVALID_CREDENTIALS);
                 ActionSupport.buildEvent(profileRequestContext, AuthnEventIds.INVALID_CREDENTIALS);

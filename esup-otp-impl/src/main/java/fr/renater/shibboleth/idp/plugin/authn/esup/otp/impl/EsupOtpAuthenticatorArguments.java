@@ -51,7 +51,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
     /** Token code to verify. */
     @Parameter(names = "--tokencode")
     @Nullable
-    private Integer tokenCode;
+    private String tokenCode;
 
     /** {@inheritDoc} */
     @Nonnull
@@ -112,7 +112,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
      * @return token code
      */
     @Nullable
-    public Integer getTokenCode() {
+    public String getTokenCode() {
         return tokenCode;
     }
 
@@ -123,7 +123,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
         if (getOtherArgs().size() == 0) {
             throw new IllegalArgumentException("Invalid operation requested, must have one additional arguments");
         } else if (getOtherArgs().size() == 3) {
-            tokenCode = Integer.valueOf(getOtherArgs().get(2));
+            tokenCode = getOtherArgs().get(2);
         }
     }
 
@@ -143,7 +143,7 @@ public class EsupOtpAuthenticatorArguments extends AbstractIdPHomeAwareCommandLi
         out.println(String.format("  --%-20s %s", "method", "Specify method. By default it's set to totp."
                 + "Possible values : bypass, passcode_grid, esupnfc, push, random_code_mail, random_code, totp, webauthn"));
         out.println(String.format("  --%-20s %s", "transport",
-                "Specify transport. By default it's set to sms." + "Possible values : sms, mail, push"));
+                "Specify transport. By default it's set to mail." + "Possible values : sms, mail, push"));
         out.println(String.format("  --%-20s %s", "userHash", "Specify userHash to call api."));
         out.println(String.format("  --%-20s %s", "tokencode", "Specify token code to verify."));
         out.println();

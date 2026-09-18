@@ -57,7 +57,7 @@ public class EsupOtpContext extends BaseContext {
 
     /** The token code supplied. */
     @Nullable
-    private Integer tokenCode;
+    private String tokenCode;
 
     /** The passcode_grid challenge supplied. */
     @Nullable
@@ -72,15 +72,14 @@ public class EsupOtpContext extends BaseContext {
             // TODO générer une exception
         }
     }
-    
+
     @Getter
     @ToString
     public class PasscodeGridChallenge {
         private Character line;
-        
+
         private Integer column;
-        
-        
+
         public PasscodeGridChallenge(int l, int c) {
             line = (char) ('A' + l);
             column = c + 1;

@@ -91,10 +91,10 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
                 return RC_OK;
             } else {
                 final String username = args.getUid();
-                final Integer tokenCode = args.getTokenCode();
-                if (username != null && tokenCode != null) {
+                final String tokenCode = args.getTokenCode();
+                if (username != null && tokenCode != null && !tokenCode.isBlank() && tokenCode.matches("\\d+")) {
 
-                    if (client.postVerify(username, tokenCode.toString())) {
+                    if (client.postVerify(username, tokenCode)) {
                         System.out.println("OK");
                         return RC_OK;
                     }
@@ -104,7 +104,7 @@ public class EsupOtpAuthenticatorCLI extends AbstractIdPHomeAwareCommandLine<Esu
                 }
 
                 final String method = args.getMethod() != null ? args.getMethod() : "totp";
-                final String transport = args.getTransport() != null ? args.getTransport() : "sms";
+                final String transport = args.getTransport() != null ? args.getTransport() : "mail";
 
                 // Create a new token.
                 final EsupOtpResponse tc = client.postSendMessage(username, method, transport);
