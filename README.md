@@ -1,13 +1,13 @@
 <!-- TOC -->
 * [Esup Otp Shibboleth](#esup-otp-shibboleth)
   * [Description](#description)
+  * [Build](#build)
+  * [Signature du plugin](#signature-du-plugin)
   * [Installation](#installation)
-    * [Copy package to the server](#copy-package-to-the-server)
-    * [Enable Multifactor Module](#enable-multifactor-module)
-    * [Install the plugin](#install-the-plugin)
   * [Configuration](#configuration)
-  * [Log check](#log-check)
-  * [Test](#test)
+  * [Tests](#tests)
+  * [Développement](#développement)
+  * [Licence](#licence)
 <!-- TOC -->
 
 # Esup Otp Shibboleth
@@ -16,7 +16,7 @@
 
 Esup Otp Shibboleth est un plugin de l'IdP Shibboleth.
 
-Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il permet d'appeler l'api REST esup-otp-api
+Ce plugin est à utilisé au sein d'un login flow de type Multi-Facteur (MFA). Il permet d'appeler l'api REST esup-otp-api et fournir une interface de sélection du second facteur d'authentification.
 
 
 | Plugin ID                      | Module(s)         | Authentication Flow ID |
@@ -29,6 +29,8 @@ Ce plugin est à utilisé au sein d'un login flow de type Multi-Factor. Il perme
 
 - OpenJDK 21
 - Maven 3.8 ou supérieur
+
+### Génération du plugin avec Maven
 
 ```
   ./mvnw clean install -s resources/.m2/settings.xml -Dno-check-m2
@@ -78,8 +80,9 @@ Vérification
 
 ```
 [username@server ~]$ $idp_install_path/bin/plugin.sh -i $idp_install_path/plugins/module.tar.gz --noCheck
-[username@server ~]$ systemctl restart tomcat10.service
 ```
+
+Redémarrage du processus de l'IdP (tomcat, jetty...)
 
 ## Configuration
 
@@ -97,9 +100,9 @@ Vérification
 |                                 |                                                                                      |                                                                      |                                                                                                                                                                                                             |
 
 
-## Configuration des logs
+### Configuration des logs
 
-Pour activer les logs debug il est nécessaire de modifier le fichier conf/logback.xml 
+Pour activer les logs en DEBUG pour le pluging, il est nécessaire de modifier le fichier conf/logback.xml de l'IdP 
 Par exemple : 
 
 ```
@@ -109,12 +112,14 @@ Par exemple :
 <logger name="fr.renater.shibboleth.idp.plugin.authn.esup.otp.impl" level="DEBUG" />
 ```
 
-## Log check
+Les fichiers de logs sont ceux de l'IdP : 
 
-- Main Log : ```$idp_install_path/logs/idp-process.log```
-- Warn and error log : ```$idp_install_path/logs/idp-warn.log```
+- Fichier de log principal : ```$idp_install_path/logs/idp-process.log```
+- Fichier de log contenant uniquement les lignes d'avertissement et d'erreur : ```$idp_install_path/logs/idp-warn.log```
 
-## Test
+## Tests
+
+Il est possible de réaliser des tests en ligne de commande une fois le plugin installé sur l'IdP.
 
 - Aide
 ```
@@ -124,14 +129,14 @@ Par exemple :
 - Lister tous les utilisateurs
 
 ```
-[username@server ~]$ $idp_install_path/bin/esupotpauth.sh --home /usr/share/shibboleth-idp --verbose --command all
+[username@server ~]$ $idp_install_path/bin/esupotpauth.sh --home $idp_install --verbose --command all
 ```
 
-### Development
+## Développement
 
-Java 21, Spring framework 7, Lombok
+Java 21, Spring framework 7, Lombok, Maven 3.8 (ou supérieur)
 
-## License
+## Licence
 
 Ce programme est un logiciel libre ; vous pouvez le redistribuer ou le modifier
 suivant les termes de la licence publique générale GNU Affero telle que publiée
