@@ -1,0 +1,1 @@
+package fr.renater.shibboleth.esup.otp.dto.user;
