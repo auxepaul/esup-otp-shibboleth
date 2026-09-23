@@ -33,3 +33,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### CheckStyle ###
+idp-plugin-esup-otp-cs-cleanup.xml
+idp-plugin-esup-otp-cs-formatter.xml
