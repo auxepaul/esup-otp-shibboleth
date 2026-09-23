@@ -3,8 +3,6 @@ package fr.renater.shibboleth.idp.plugin.authn.esup.otp.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import fr.renater.shibboleth.esup.otp.dto.EsupOtpResponse;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
