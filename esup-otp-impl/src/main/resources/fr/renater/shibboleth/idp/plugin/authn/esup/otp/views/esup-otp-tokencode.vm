@@ -36,11 +36,12 @@
 ##
 #set ($nonce = $cspNonce.generateIdentifier())
 #set ($onClick = "this.childNodes[0].nodeValue='#springMessageText('idp.login.pleasewait', 'Logging in, please wait...')'")
+#set ($onClickBack = "this.childNodes[0].nodeValue='#springMessageText('idp.login.back.processed', 'Back to the methods choice, please wait...')'")
 #set ($onClickResend = "this.childNodes[0].nodeValue='#springMessageText('idp.esup.otp.resend.processed', 'Resend processed, please wait...')'")
 #if ("totp" == $method || "passcode_grid" == $method || "bypass" == $method || "random_code.sms" == $method || "random_code_mail.mail" == $method)
-$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onLoad)' 'sha256-$cspDigester.apply($onClick)' 'sha256-$cspDigester.apply($onClickResend)' 'nonce-$nonce'")
+$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onLoad)' 'sha256-$cspDigester.apply($onClick)' 'sha256-$cspDigester.apply($onClickResend)' 'sha256-$cspDigester.apply($onClickBack)' 'nonce-$nonce'")
 #else
-$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onClick)' 'sha256-$cspDigester.apply($onClickResend)' 'nonce-$nonce'")
+$response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 'sha256-$cspDigester.apply($onClick)' 'sha256-$cspDigester.apply($onClickResend)' 'sha256-$cspDigester.apply($onClickBack)' 'nonce-$nonce'")
 #end
 <!DOCTYPE html>
 <html>
@@ -248,6 +249,7 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                         document.getElementById(retry_button_id).disabled = false;
                         document.getElementById(form_id).disabled = false;
                     } else {
+                        document.getElementById("error_retry_message").textContent = errorNoRetryMessage;
                         document.getElementById(retry_button_id).disabled = true;
                         document.getElementById(form_id).disabled = true;
                     }
@@ -523,6 +525,9 @@ $response.addHeader("Content-Security-Policy", "script-src-attr 'unsafe-hashes' 
                             #end
                                 <div class="token-overflow"></div>
                             </div>
+
+                            <button class="button float-left" type="submit" name="_eventId_back" id="backButton"
+                                    onClick="$onClickBack">#springMessageText("idp.esup.otp.back", "Back to the methods choice")</button>
 
                         #if ("random_code.sms" == $method || "random_code_mail.mail" == $method)
                             <button class="button float-left" type="submit" name="_eventId_resend" id="retryButton"

@@ -96,6 +96,7 @@
                 result="viewScope.custom" />
             <!--<evaluate expression="authenticationContext.ensureSubcontext(T(fr.renater.shibboleth.idp.plugin.authn.esup.otp.context.EsupOtpContext))" result="viewScope.esupOtpContext" />-->
         </on-render>
+        <transition on="back" to="DisplayEsupOtpView" />
         <transition on="resend" to="EsupOtpExtraction" />
         <transition on="proceed" to="EsupOtpExtractionToken" />
     </view-state>
